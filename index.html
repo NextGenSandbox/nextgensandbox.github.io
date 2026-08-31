@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Android Host File – ROMs • TWRP • Odin</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Android Host File</h1>
+      <p>TWRP • Custom ROMs • Odin Firmware • Kernels</p>
+      
+      <div class="header-actions">
+        <input type="text" id="search" placeholder="Search device or codename (e.g. s21, a52, beyond1)...">
+        <button id="uploadBtn" class="upload-btn">Upload Host!</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="filters">
+      <button class="filter active" data-filter="all">All</button>
+      <button class="filter" data-filter="samsung">Samsung</button>
+      <button class="filter" data-filter="twrp">TWRP</button>
+      <button class="filter" data-filter="rom">ROMs</button>
+      <button class="filter" data-filter="odin">Odin</button>
+      <button class="filter" data-filter="other">Other</button>
+    </div>
+
+    <div id="devices" class="grid"></div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Self-hosted catalog • Add your own files via GitHub • No tracking</p>
+    </div>
+  </footer>
+
+  <!-- Upload Modal -->
+  <div id="uploadModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Upload Host! – Requirements</h2>
+      <p class="modal-desc">Fill the fields below, then open a GitHub Issue with the information. We will add it to the catalog.</p>
+
+      <div class="form-group">
+        <label>Device Name *</label>
+        <input type="text" id="req-device" placeholder="e.g. Samsung Galaxy S21">
+      </div>
+
+      <div class="form-group">
+        <label>Codename *</label>
+        <input type="text" id="req-codename" placeholder="e.g. o1s / beyond1">
+      </div>
+
+      <div class="form-group">
+        <label>File Type *</label>
+        <select id="req-type">
+          <option value="">Select type</option>
+          <option value="twrp">TWRP / Recovery</option>
+          <option value="rom">Custom ROM</option>
+          <option value="odin">Odin Firmware (.tar.md5)</option>
+          <option value="kernel">Kernel</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Download Link(s) *</label>
+        <textarea id="req-links" rows="3" placeholder="https://... (GitHub Release, Mega, Archive.org, etc.)"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Version / Build Date</label>
+        <input type="text" id="req-version" placeholder="e.g. 3.7.0-12 or 2024-08-15">
+      </div>
+
+      <div class="form-group">
+        <label>Checksum (MD5 or SHA256) – recommended</label>
+        <input type="text" id="req-hash" placeholder="Optional but highly recommended">
+      </div>
+
+      <div class="form-group">
+        <label>Notes / Source</label>
+        <textarea id="req-notes" rows="2" placeholder="Official TWRP, XDA thread, developer name, etc."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button id="copyBtn" class="copy-btn">Copy filled info</button>
+        <a id="issueLink" href="https://github.com/YOUR_USERNAME/android-host-file/issues/new" target="_blank" class="issue-btn">
+          Open GitHub Issue →
+        </a>
+      </div>
+
+      <p class="note">* Required fields. After copying, paste into the GitHub Issue description.</p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
