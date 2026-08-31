@@ -25,6 +25,22 @@ async function loadDevices() {
   applyFilters();
 }
 
+function getTags(d) {
+  // Works whether tags is a string or array
+  if (Array.isArray(d.tags)) {
+    return d.tags.map(t => String(t).toLowerCase().trim());
+  }
+  if (typeof d.tags === "string" && d.tags.trim() !== "") {
+    // Remove possible brackets and quotes
+    return d.tags
+      .replace(/[\[\]"]/g, "")
+      .split(",")
+      .map(t => t.toLowerCase().trim())
+      .filter(t => t);
+  }
+  return [];
+}
+
 function render(devicesToShow) {
   if (devicesToShow.length === 0) {
     grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#9ca3af">No devices found.</p>`;
@@ -32,15 +48,8 @@ function render(devicesToShow) {
   }
 
   grid.innerHTML = devicesToShow.map(d => {
-    // Clean tags
-    let tags = [];
-    if (Array.isArray(d.tags)) {
-      tags = d.tags;
-    } else if (typeof d.tags === "string") {
-      tags = [d.tags];
-    }
+    const tags = getTags(d);
 
-    // Clean links
     let links = [];
     if (Array.isArray(d.links)) {
       links = d.links;
@@ -70,30 +79,22 @@ function applyFilters() {
   const activeFilter = document.querySelector(".filter.active")?.dataset.filter || "all";
 
   const filtered = allDevices.filter(d => {
-    // Search
     const matchesSearch =
       (d.name || "").toLowerCase().includes(query) ||
       (d.codename || "").toLowerCase().includes(query);
 
-    // Get clean tags
-    let tags = [];
-    if (Array.isArray(d.tags)) {
-      tags = d.tags.map(t => t.toLowerCase());
-    } else if (typeof d.tags === "string") {
-      tags = [d.tags.toLowerCase()];
-    }
+    const tags = getTags(d);
 
-    // Filter logic
     let matchesFilter = false;
 
     if (activeFilter === "all") {
       matchesFilter = true;
     } else if (activeFilter === "samsung") {
-      matchesFilter = d.brand === "samsung";
+      matchesFilter = (d.brand || "").toLowerCase() === "samsung";
     } else if (activeFilter === "other") {
-      matchesFilter = d.brand === "other" || tags.includes("other");
+      matchesFilter = (d.brand || "").toLowerCase() === "other" || tags.includes("other");
     } else {
-      // twrp, rom, odin, kernel etc.
+      // twrp, rom, odin, kernel, etc.
       matchesFilter = tags.includes(activeFilter);
     }
 
@@ -152,11 +153,12 @@ submitBtn.onclick = async () => {
   submitBtn.textContent = "Saving...";
   statusEl.textContent = "";
 
+  // Save tags as simple text (not array)
   const { error } = await supabaseClient.from("devices").insert({
     name,
     codename,
     brand,
-    tags: [type],
+    tags: type,               // ← simple text now
     links: [{ label, url: link }],
     version: version || null,
     hash: hash || null,
