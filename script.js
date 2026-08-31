@@ -1,7 +1,6 @@
 const SUPABASE_URL = "https://ikiiamibzznlvxokogpq.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlraWlhbWlienpubHZ4b2tvZ3BxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxOTE5OTksImV4cCI6MjEwMzc2Nzk5OX0.XnlTaP71R0r3iKu9cvjp52HHUacX_s982JN_vgv_4F4";
 
-// Create client safely
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let allDevices = [];
@@ -28,13 +27,26 @@ async function loadDevices() {
 
 function render(devicesToShow) {
   if (devicesToShow.length === 0) {
-    grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#9ca3af">No devices yet. Be the first to upload!</p>`;
+    grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#9ca3af">No devices found.</p>`;
     return;
   }
 
   grid.innerHTML = devicesToShow.map(d => {
-    const tags = Array.isArray(d.tags) ? d.tags : (d.tags ? [d.tags] : []);
-    const links = Array.isArray(d.links) ? d.links : (d.links ? [d.links] : []);
+    // Clean tags
+    let tags = [];
+    if (Array.isArray(d.tags)) {
+      tags = d.tags;
+    } else if (typeof d.tags === "string") {
+      tags = [d.tags];
+    }
+
+    // Clean links
+    let links = [];
+    if (Array.isArray(d.links)) {
+      links = d.links;
+    } else if (d.links) {
+      links = [d.links];
+    }
 
     return `
       <div class="card">
@@ -46,6 +58,8 @@ function render(devicesToShow) {
         <div class="links">
           ${links.map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.label || "Download"}</a>`).join("")}
         </div>
+        ${d.version ? `<div style="font-size:0.85rem;color:#9ca3af;margin-top:8px">Version: ${d.version}</div>` : ""}
+        ${d.notes ? `<div style="font-size:0.85rem;color:#9ca3af;margin-top:4px">${d.notes}</div>` : ""}
       </div>
     `;
   }).join("");
@@ -56,15 +70,32 @@ function applyFilters() {
   const activeFilter = document.querySelector(".filter.active")?.dataset.filter || "all";
 
   const filtered = allDevices.filter(d => {
+    // Search
     const matchesSearch =
       (d.name || "").toLowerCase().includes(query) ||
       (d.codename || "").toLowerCase().includes(query);
 
-    const tags = Array.isArray(d.tags) ? d.tags : [];
-    const matchesFilter =
-      activeFilter === "all" ||
-      d.brand === activeFilter ||
-      tags.includes(activeFilter);
+    // Get clean tags
+    let tags = [];
+    if (Array.isArray(d.tags)) {
+      tags = d.tags.map(t => t.toLowerCase());
+    } else if (typeof d.tags === "string") {
+      tags = [d.tags.toLowerCase()];
+    }
+
+    // Filter logic
+    let matchesFilter = false;
+
+    if (activeFilter === "all") {
+      matchesFilter = true;
+    } else if (activeFilter === "samsung") {
+      matchesFilter = d.brand === "samsung";
+    } else if (activeFilter === "other") {
+      matchesFilter = d.brand === "other" || tags.includes("other");
+    } else {
+      // twrp, rom, odin, kernel etc.
+      matchesFilter = tags.includes(activeFilter);
+    }
 
     return matchesSearch && matchesFilter;
   });
@@ -82,7 +113,7 @@ filterButtons.forEach(btn => {
 
 searchInput.addEventListener("input", applyFilters);
 
-// Modal logic
+// Modal
 const modal = document.getElementById("uploadModal");
 const uploadBtn = document.getElementById("uploadBtn");
 const closeBtn = document.querySelector(".close");
@@ -94,9 +125,7 @@ uploadBtn.onclick = () => {
   statusEl.textContent = "";
 };
 
-closeBtn.onclick = () => {
-  modal.style.display = "none";
-};
+closeBtn.onclick = () => modal.style.display = "none";
 
 window.onclick = (e) => {
   if (e.target === modal) modal.style.display = "none";
@@ -146,7 +175,6 @@ submitBtn.onclick = async () => {
   statusEl.textContent = "Saved successfully!";
   statusEl.style.color = "#34d399";
 
-  // Clear form
   document.getElementById("req-device").value = "";
   document.getElementById("req-codename").value = "";
   document.getElementById("req-link").value = "";
@@ -163,5 +191,5 @@ submitBtn.onclick = async () => {
   }, 1000);
 };
 
-// Start loading
+// Start
 loadDevices();
