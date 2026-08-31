@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Android Host File – ROMs • TWRP • Odin</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <header>
@@ -14,7 +14,7 @@
       <p>TWRP • Custom ROMs • Odin Firmware • Kernels</p>
       
       <div class="header-actions">
-        <input type="text" id="search" placeholder="Search device or codename (e.g. s21, a52, beyond1)...">
+        <input type="text" id="search" placeholder="Search device or codename...">
         <button id="uploadBtn" class="upload-btn">Upload Host!</button>
       </div>
     </div>
@@ -30,12 +30,14 @@
       <button class="filter" data-filter="other">Other</button>
     </div>
 
-    <div id="devices" class="grid"></div>
+    <div id="devices" class="grid">
+      <p style="grid-column:1/-1;text-align:center;color:#9ca3af">Loading...</p>
+    </div>
   </main>
 
   <footer>
     <div class="container">
-      <p>Self-hosted catalog • Add your own files via GitHub • No tracking</p>
+      <p>Powered by Supabase • Uploads are saved for everyone</p>
     </div>
   </footer>
 
@@ -43,8 +45,8 @@
   <div id="uploadModal" class="modal">
     <div class="modal-content">
       <span class="close">&times;</span>
-      <h2>Upload Host! – Requirements</h2>
-      <p class="modal-desc">Fill the fields below, then open a GitHub Issue with the information. We will add it to the catalog.</p>
+      <h2>Upload Host!</h2>
+      <p class="modal-desc">Fill the form and it will be saved for everyone.</p>
 
       <div class="form-group">
         <label>Device Name *</label>
@@ -53,49 +55,58 @@
 
       <div class="form-group">
         <label>Codename *</label>
-        <input type="text" id="req-codename" placeholder="e.g. o1s / beyond1">
+        <input type="text" id="req-codename" placeholder="e.g. o1s">
+      </div>
+
+      <div class="form-group">
+        <label>Brand *</label>
+        <select id="req-brand">
+          <option value="samsung">Samsung</option>
+          <option value="other">Other</option>
+        </select>
       </div>
 
       <div class="form-group">
         <label>File Type *</label>
         <select id="req-type">
-          <option value="">Select type</option>
           <option value="twrp">TWRP / Recovery</option>
           <option value="rom">Custom ROM</option>
-          <option value="odin">Odin Firmware (.tar.md5)</option>
+          <option value="odin">Odin Firmware</option>
           <option value="kernel">Kernel</option>
           <option value="other">Other</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label>Download Link(s) *</label>
-        <textarea id="req-links" rows="3" placeholder="https://... (GitHub Release, Mega, Archive.org, etc.)"></textarea>
+        <label>Download Link *</label>
+        <input type="url" id="req-link" placeholder="https://...">
       </div>
 
       <div class="form-group">
-        <label>Version / Build Date</label>
-        <input type="text" id="req-version" placeholder="e.g. 3.7.0-12 or 2024-08-15">
+        <label>Link Label</label>
+        <input type="text" id="req-label" placeholder="e.g. TWRP 3.7.1" value="Download">
       </div>
 
       <div class="form-group">
-        <label>Checksum (MD5 or SHA256) – recommended</label>
-        <input type="text" id="req-hash" placeholder="Optional but highly recommended">
+        <label>Version</label>
+        <input type="text" id="req-version" placeholder="optional">
       </div>
 
       <div class="form-group">
-        <label>Notes / Source</label>
-        <textarea id="req-notes" rows="2" placeholder="Official TWRP, XDA thread, developer name, etc."></textarea>
+        <label>Checksum (MD5/SHA)</label>
+        <input type="text" id="req-hash" placeholder="optional">
+      </div>
+
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="req-notes" rows="2" placeholder="optional"></textarea>
       </div>
 
       <div class="modal-actions">
-        <button id="copyBtn" class="copy-btn">Copy filled info</button>
-        <a id="issueLink" href="https://github.com/YOUR_USERNAME/android-host-file/issues/new" target="_blank" class="issue-btn">
-          Open GitHub Issue →
-        </a>
+        <button id="submitBtn" class="copy-btn">Save to Site</button>
       </div>
 
-      <p class="note">* Required fields. After copying, paste into the GitHub Issue description.</p>
+      <p id="status" class="note"></p>
     </div>
   </div>
 
