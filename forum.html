@@ -1,9 +1,11 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Android Hosts File Forum</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Android Host File – Forum</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -11,981 +13,674 @@
     :root {
       --bg: #0f1115;
       --card: #1a1d24;
-      --card-hover: #20242c;
-      --text: #e2e8f0;
-      --muted: #a0aec0;
-      --accent: #3ddc84;
-      --accent-dark: #2bbd6d;
-      --error: #ef4444;
-      --border: #2d3748;
-      --input: #2d3748;
+      --card2: #111827;
+      --accent: #3b82f6;
+      --green: #10b981;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #2d3139;
+      --danger: #ef4444;
     }
 
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
-      max-width: 850px;
-      margin: 0 auto;
-      padding: 20px;
       line-height: 1.5;
+      min-height: 100vh;
     }
 
-    h1,
-    h2,
-    h3 {
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .container {
+      width: min(1100px, calc(100% - 32px));
+      margin: auto;
+    }
+
+    header {
+      background: linear-gradient(180deg, #111827 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 28px 0;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .brand h1 {
       color: #fff;
+      font-size: 1.9rem;
     }
 
-    h1 {
-      margin-top: 10px;
+    .brand p {
+      color: var(--muted);
+      font-size: .9rem;
     }
 
-    .box {
+    nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+
+    nav a:hover,
+    nav a.active {
       background: var(--card);
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
+      color: white;
+    }
+
+    .userbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 18px;
+      padding: 12px 15px;
       border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(26, 29, 36, .8);
+    }
+
+    main {
+      padding: 25px 0 60px;
     }
 
     .hidden {
       display: none !important;
     }
 
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 14px;
-      color: #cbd5e1;
-      font-weight: 600;
+    .box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .box h2 {
+      color: #fff;
+      margin-bottom: 7px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .button {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      background: var(--accent);
+      color: white;
+      font-weight: 700;
+    }
+
+    .button.green {
+      background: var(--green);
+    }
+
+    .button.gray {
+      background: #374151;
+    }
+
+    .button.red {
+      background: var(--danger);
+    }
+
+    .button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
     }
 
     input,
-    select,
-    textarea {
+    textarea,
+    select {
       width: 100%;
-      padding: 12px;
-      margin-bottom: 14px;
-      background: var(--input);
-      border: 1px solid #4a5568;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 13px;
+      background: var(--card2);
       color: white;
-      border-radius: 6px;
-      font: inherit;
+      outline: none;
     }
 
     textarea {
+      min-height: 160px;
       resize: vertical;
-      min-height: 140px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
     input:focus,
-    select:focus,
-    textarea:focus {
-      outline: 2px solid var(--accent);
-      outline-offset: 1px;
-      border-color: transparent;
+    textarea:focus,
+    select:focus {
+      border-color: var(--accent);
     }
 
-    button {
-      background: var(--accent);
-      color: #07120c;
-      padding: 11px 18px;
+    label {
+      display: block;
+      color: #d1d5db;
+      font-size: .9rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .auth-card {
+      max-width: 450px;
+      margin: 40px auto;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 18px;
+    }
+
+    .auth-tabs button {
+      flex: 1;
       border: none;
-      border-radius: 6px;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 15px;
-      transition: opacity 0.15s ease, transform 0.15s ease;
-    }
-
-    button:hover:not(:disabled) {
-      opacity: 0.9;
-    }
-
-    button:active:not(:disabled) {
-      transform: translateY(1px);
-    }
-
-    button:disabled {
-      cursor: not-allowed;
-      opacity: 0.55;
-    }
-
-    .btn-secondary {
-      background: #4a5568;
+      padding: 10px;
+      border-radius: 7px;
+      background: #374151;
       color: white;
     }
 
-    .error-msg {
-      color: var(--error);
-      font-weight: 600;
-      margin-bottom: 15px;
+    .auth-tabs button.active {
+      background: var(--accent);
     }
 
-    .success-msg {
-      color: var(--accent);
+    .message-error {
+      color: #f87171;
       font-weight: 600;
-      margin-bottom: 15px;
+      margin: 10px 0;
     }
 
-    .info-msg {
+    .message-success {
+      color: #34d399;
+      font-weight: 600;
+      margin: 10px 0;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+      margin: 20px 0 28px;
+    }
+
+    .category-card {
+      padding: 18px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-decoration: none;
+      transition: .15s;
+    }
+
+    .category-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .category-icon {
+      font-size: 1.8rem;
+      margin-bottom: 7px;
+    }
+
+    .category-card h3 {
+      color: white;
+      margin-bottom: 5px;
+    }
+
+    .category-card p {
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .toolbar input {
+      flex: 1;
+    }
+
+    .thread-card {
+      display: block;
+      text-decoration: none;
+      padding: 17px;
+      margin-bottom: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .thread-card:hover {
+      border-color: var(--accent);
+      background: #1d222b;
+    }
+
+    .thread-title {
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .thread-meta {
+      color: var(--muted);
+      font-size: .8rem;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #1e293b;
       color: #93c5fd;
-      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: .72rem;
+      margin-right: 5px;
+      margin-bottom: 4px;
+    }
+
+    .post {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
       margin-bottom: 15px;
     }
 
     .post-header {
       display: flex;
-      gap: 10px;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 10px;
+      gap: 10px;
+      padding: 12px 15px;
+      background: #161a21;
+      border-bottom: 1px solid var(--border);
     }
 
-    .post-header h3 {
-      overflow-wrap: anywhere;
+    .post-user {
+      color: #93c5fd;
+      font-weight: 700;
     }
 
-    .tag {
-      background: #2d3748;
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-size: 12px;
-      color: var(--accent);
-      white-space: nowrap;
-    }
-
-    .meta {
-      font-size: 12px;
+    .post-date {
       color: var(--muted);
-      margin-bottom: 12px;
+      font-size: .75rem;
     }
 
-    pre {
-      background: #080a0d;
-      padding: 15px;
-      border-radius: 6px;
-      overflow-x: auto;
+    .post-body {
+      padding: 18px;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
-      color: var(--accent);
-      border: 1px solid var(--border);
-      max-height: 500px;
-      overflow-y: auto;
     }
 
-    .account-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
+    .post-actions {
+      padding: 0 18px 15px;
     }
 
-    .auth-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+    .device-box {
+      border-left: 3px solid var(--accent);
+      background: #111827;
+      padding: 12px;
+      border-radius: 5px;
+      margin-bottom: 16px;
     }
 
-    .auth-buttons button {
-      margin: 0;
-    }
-
-    .loading {
+    .empty {
+      text-align: center;
       color: var(--muted);
+      padding: 30px;
     }
 
-    .hint {
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 0;
+      text-align: center;
       color: var(--muted);
-      font-size: 13px;
-      margin-top: -7px;
-      margin-bottom: 15px;
+      font-size: .8rem;
     }
 
-    @media (max-width: 600px) {
-      body {
-        padding: 12px;
-      }
-
-      .box {
-        padding: 16px;
-      }
-
-      .account-bar,
-      .post-header {
+    @media (max-width: 700px) {
+      .header-top,
+      .userbar {
         flex-direction: column;
-        align-items: stretch;
+        align-items: flex-start;
       }
 
-      .tag {
-        align-self: flex-start;
+      .toolbar {
+        flex-direction: column;
       }
     }
   </style>
 </head>
 
 <body>
-  <h1>🤖 Android Hosts File Forum</h1>
 
-  <!-- AUTHENTICATION -->
-  <section id="authPage" class="box">
-    <h2>Account Login / Register</h2>
+<header>
+  <div class="container">
+
+    <div class="header-top">
+
+      <div class="brand">
+        <h1>Android Host File</h1>
+        <p>TWRP • Custom ROMs • Odin Firmware • Kernels</p>
+      </div>
+
+      <nav>
+        <a href="index.html">Downloads</a>
+        <a href="forum.html" class="active">Forum</a>
+      </nav>
+
+    </div>
+
+    <div id="userbar" class="userbar hidden">
+      <div>
+        Logged in as:
+        <strong id="usernameDisplay"></strong>
+      </div>
+
+      <button id="logoutBtn" class="button gray">
+        Log Out
+      </button>
+    </div>
+
+  </div>
+</header>
+
+
+<main class="container">
+
+  <!-- LOGIN -->
+  <section id="authPage" class="box auth-card">
+
+    <h2 id="authTitle">Sign In</h2>
+
+    <p class="muted" style="margin-bottom:18px">
+      Login to participate in the Android Host File forum.
+    </p>
+
+    <div class="auth-tabs">
+      <button id="loginTab" class="active">Sign In</button>
+      <button id="registerTab">Register</button>
+    </div>
 
     <div id="authMessage"></div>
 
-    <label for="username">Username</label>
-    <input
-      type="text"
-      id="username"
-      maxlength="24"
-      autocomplete="username"
-      placeholder="Choose a username"
-    />
+    <div class="form-group">
+      <label for="usernameInput">Username</label>
 
-    <div class="hint">
-      3–24 characters. Letters, numbers, underscores and hyphens only.
-    </div>
-
-    <label for="password">Password</label>
-    <input
-      type="password"
-      id="password"
-      minlength="6"
-      maxlength="128"
-      autocomplete="current-password"
-      placeholder="At least 6 characters"
-    />
-
-    <div class="auth-buttons">
-      <button id="loginButton" type="button" onclick="handleAuth('login')">
-        Sign In
-      </button>
-
-      <button
-        id="registerButton"
-        type="button"
-        class="btn-secondary"
-        onclick="handleAuth('register')"
+      <input
+        id="usernameInput"
+        type="text"
+        maxlength="24"
+        autocomplete="username"
+        placeholder="Your username"
       >
-        Create Account
-      </button>
     </div>
+
+    <div class="form-group">
+      <label for="passwordInput">Password</label>
+
+      <input
+        id="passwordInput"
+        type="password"
+        maxlength="128"
+        placeholder="At least 6 characters"
+      >
+    </div>
+
+    <button
+      id="authBtn"
+      class="button"
+      style="width:100%"
+    >
+      Sign In
+    </button>
+
   </section>
 
-  <!-- FORUM -->
-  <main id="forumPage" class="hidden">
 
-    <section class="box account-bar">
+  <!-- FORUM HOME -->
+  <section id="forumHome" class="hidden">
+
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:15px;
+      margin-bottom:15px;
+    ">
+
       <div>
-        Logged in as:
-        <strong id="userDisplay" style="color: var(--accent);"></strong>
+        <h2>Forum</h2>
+
+        <p class="muted">
+          Custom ROMs, TWRP, root, kernels and Android development.
+        </p>
       </div>
 
       <button
-        class="btn-secondary"
-        type="button"
-        onclick="logout()"
+        id="newThreadBtn"
+        class="button green"
       >
-        Log Out
+        + New Thread
       </button>
-    </section>
 
-    <section class="box">
-      <h2>Share a New Hosts File</h2>
+    </div>
 
-      <div id="postMessage"></div>
 
-      <label for="postTitle">Title</label>
+    <div id="categoryGrid" class="category-grid"></div>
+
+
+    <div class="toolbar">
+
       <input
-        type="text"
-        id="postTitle"
-        maxlength="100"
-        placeholder="Example: Block Common Ad Servers"
-      />
+        id="searchInput"
+        type="search"
+        placeholder="Search discussions..."
+      >
 
-      <label for="postCategory">Category</label>
-      <select id="postCategory">
-        <option value="Adblocking">Adblocking</option>
-        <option value="Malware">Malware & Tracking</option>
-        <option value="Gaming">Gaming & Apps</option>
-        <option value="General">General</option>
+      <select id="categorySelect">
+        <option value="all">
+          All Categories
+        </option>
       </select>
 
-      <label for="postContent">Hosts rules</label>
+    </div>
+
+
+    <h2 style="margin-bottom:12px">
+      Recent Discussions
+    </h2>
+
+    <div id="threadsList"></div>
+
+  </section>
+
+
+  <!-- NEW THREAD -->
+  <section id="newThreadPage" class="hidden">
+
+    <button
+      id="backFromThreadBtn"
+      class="button gray"
+      style="margin-bottom:15px"
+    >
+      ← Back to Forum
+    </button>
+
+    <div class="box">
+
+      <h2>Create New Thread</h2>
+
+      <div id="threadMessage"></div>
+
+      <div class="form-group">
+        <label>Title *</label>
+
+        <input
+          id="threadTitle"
+          maxlength="150"
+          placeholder="[ROM] LineageOS for Galaxy S21"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Category *</label>
+
+        <select id="threadCategory"></select>
+      </div>
+
+      <div class="form-group">
+        <label>Type *</label>
+
+        <select id="threadType">
+          <option>Discussion</option>
+          <option>ROM</option>
+          <option>Recovery</option>
+          <option>Kernel</option>
+          <option>Root</option>
+          <option>Guide</option>
+          <option>Development</option>
+          <option>Question</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Device</label>
+
+        <input
+          id="threadDevice"
+          maxlength="100"
+          placeholder="Samsung Galaxy S21"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Codename</label>
+
+        <input
+          id="threadCodename"
+          maxlength="50"
+          placeholder="o1s"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Android Version</label>
+
+        <input
+          id="threadAndroid"
+          maxlength="30"
+          placeholder="Android 16"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Message *</label>
+
+        <textarea
+          id="threadContent"
+          maxlength="50000"
+          placeholder="Write your post..."
+        ></textarea>
+      </div>
+
+      <button
+        id="publishThreadBtn"
+        class="button green"
+      >
+        Publish Thread
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- THREAD -->
+  <section id="threadPage" class="hidden">
+
+    <button
+      id="backToForumBtn"
+      class="button gray"
+      style="margin-bottom:15px"
+    >
+      ← Back to Forum
+    </button>
+
+    <div id="threadContainer"></div>
+
+    <div class="box">
+
+      <h2>Reply</h2>
+
+      <div id="replyMessage"></div>
+
       <textarea
-        id="postContent"
-        maxlength="50000"
-        spellcheck="false"
-        placeholder="0.0.0.0 ads.example.com&#10;0.0.0.0 tracker.example.com"
+        id="replyInput"
+        maxlength="20000"
+        placeholder="Write your reply..."
       ></textarea>
 
-      <button id="publishButton" type="button" onclick="createPost()">
-        Publish Post
+      <button
+        id="replyBtn"
+        class="button"
+        style="margin-top:10px"
+      >
+        Post Reply
       </button>
-    </section>
 
-    <h2>Recent Posts</h2>
+    </div>
 
-    <div id="postsStatus" class="loading"></div>
-    <div id="postsFeed"></div>
-  </main>
+  </section>
 
-  <script>
-    /*
-     * ============================================================
-     * SUPABASE CONFIGURATION
-     * ============================================================
-     *
-     * The anon/publishable key is intended to be used in browser
-     * applications.
-     *
-     * NEVER put a Supabase service_role key in this file.
-     */
+</main>
 
-    const SUPABASE_URL =
-      "https://hzazezszxbgethzkqmmf.supabase.co";
 
-    const SUPABASE_KEY =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YXplenN6eGJlZ3RoemtxbW1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNjA3NjQsImV4cCI6MjEwMzgzNjc2NH0.Vgi0AbiYnzPOD_uVafIMcUbNS-DbnD16BlVYTuHopQA";
+<footer>
+  <div class="container">
+    Android Host File • TWRP • Custom ROMs • Kernels
+  </div>
+</footer>
 
-    const supabaseClient =
-      window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-      );
+<script src="forum.js"></script>
 
-    let currentUser = null;
-    let currentUsername = null;
-
-    const ALLOWED_CATEGORIES = [
-      "Adblocking",
-      "Malware",
-      "Gaming",
-      "General"
-    ];
-
-    /*
-     * Because Supabase Auth normally authenticates by email,
-     * this application converts a forum username into an
-     * internal email address.
-     *
-     * Users never need to see or enter this email.
-     *
-     * IMPORTANT:
-     * Disable "Confirm email" in your Supabase project when
-     * using this username-only system.
-     */
-    function usernameToEmail(username) {
-      return `${username}@users.androidhostforum.com`;
-    }
-
-    function normalizeUsername(value) {
-      return String(value || "")
-        .trim()
-        .toLowerCase();
-    }
-
-    function isValidUsername(username) {
-      return /^[a-z0-9_-]{3,24}$/.test(username);
-    }
-
-    function setMessage(elementId, message, type = "error") {
-      const element = document.getElementById(elementId);
-
-      element.textContent = message || "";
-
-      if (!message) {
-        element.className = "";
-        return;
-      }
-
-      if (type === "success") {
-        element.className = "success-msg";
-      } else if (type === "info") {
-        element.className = "info-msg";
-      } else {
-        element.className = "error-msg";
-      }
-    }
-
-    function setAuthLoading(loading) {
-      document.getElementById("loginButton").disabled = loading;
-      document.getElementById("registerButton").disabled = loading;
-    }
-
-    /*
-     * ============================================================
-     * AUTH STATE
-     * ============================================================
-     */
-
-    supabaseClient.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session?.user) {
-          currentUser = session.user;
-
-          currentUsername =
-            session.user.user_metadata?.username ||
-            "user";
-
-          showForum();
-          await loadPosts();
-        } else {
-          currentUser = null;
-          currentUsername = null;
-          showAuthPage();
-        }
-      }
-    );
-
-    async function initializeApp() {
-      const {
-        data: { session },
-        error
-      } = await supabaseClient.auth.getSession();
-
-      if (error) {
-        console.error("Session error:", error);
-      }
-
-      if (session?.user) {
-        currentUser = session.user;
-
-        currentUsername =
-          session.user.user_metadata?.username ||
-          "user";
-
-        showForum();
-        await loadPosts();
-      } else {
-        showAuthPage();
-      }
-    }
-
-    function showForum() {
-      document
-        .getElementById("authPage")
-        .classList.add("hidden");
-
-      document
-        .getElementById("forumPage")
-        .classList.remove("hidden");
-
-      document.getElementById("userDisplay").textContent =
-        currentUsername || "User";
-    }
-
-    function showAuthPage() {
-      document
-        .getElementById("forumPage")
-        .classList.add("hidden");
-
-      document
-        .getElementById("authPage")
-        .classList.remove("hidden");
-    }
-
-    /*
-     * ============================================================
-     * REGISTER / LOGIN
-     * ============================================================
-     */
-
-    async function handleAuth(action) {
-      const usernameInput =
-        document.getElementById("username");
-
-      const passwordInput =
-        document.getElementById("password");
-
-      const username =
-        normalizeUsername(usernameInput.value);
-
-      const password =
-        passwordInput.value;
-
-      setMessage("authMessage", "");
-
-      if (!username || !password) {
-        setMessage(
-          "authMessage",
-          "Enter both a username and password."
-        );
-        return;
-      }
-
-      if (!isValidUsername(username)) {
-        setMessage(
-          "authMessage",
-          "Username must be 3–24 characters and contain only letters, numbers, underscores or hyphens."
-        );
-        return;
-      }
-
-      if (password.length < 6) {
-        setMessage(
-          "authMessage",
-          "Password must contain at least 6 characters."
-        );
-        return;
-      }
-
-      const email = usernameToEmail(username);
-
-      setAuthLoading(true);
-
-      try {
-        if (action === "register") {
-          setMessage(
-            "authMessage",
-            "Creating account...",
-            "info"
-          );
-
-          const {
-            data,
-            error
-          } = await supabaseClient.auth.signUp({
-            email,
-            password,
-
-            options: {
-              data: {
-                username
-              }
-            }
-          });
-
-          if (error) {
-            throw error;
-          }
-
-          /*
-           * If email confirmation is disabled,
-           * Supabase normally returns a session immediately.
-           */
-          if (data.session) {
-            setMessage(
-              "authMessage",
-              "Account created successfully.",
-              "success"
-            );
-
-            usernameInput.value = "";
-            passwordInput.value = "";
-            return;
-          }
-
-          /*
-           * When Confirm Email is enabled no usable session
-           * will exist because the internal email cannot
-           * receive confirmation emails.
-           */
-          setMessage(
-            "authMessage",
-            "Account was created, but Supabase email confirmation is enabled. Disable Confirm Email in Supabase Authentication settings for username-only accounts."
-          );
-
-        } else if (action === "login") {
-          setMessage(
-            "authMessage",
-            "Signing in...",
-            "info"
-          );
-
-          const {
-            data,
-            error
-          } =
-            await supabaseClient.auth.signInWithPassword({
-              email,
-              password
-            });
-
-          if (error) {
-            setMessage(
-              "authMessage",
-              "Incorrect username or password."
-            );
-
-            return;
-          }
-
-          if (!data.session) {
-            setMessage(
-              "authMessage",
-              "Unable to create a login session."
-            );
-
-            return;
-          }
-
-          usernameInput.value = "";
-          passwordInput.value = "";
-        }
-      } catch (error) {
-        console.error("Authentication error:", error);
-
-        let message =
-          error?.message ||
-          "An authentication error occurred.";
-
-        /*
-         * Give nicer messages for common errors.
-         */
-        if (
-          message
-            .toLowerCase()
-            .includes("already registered")
-        ) {
-          message =
-            "That username is already registered.";
-        }
-
-        setMessage("authMessage", message);
-
-      } finally {
-        setAuthLoading(false);
-      }
-    }
-
-    /*
-     * ============================================================
-     * LOGOUT
-     * ============================================================
-     */
-
-    async function logout() {
-      const { error } =
-        await supabaseClient.auth.signOut();
-
-      if (error) {
-        alert("Could not log out: " + error.message);
-      }
-    }
-
-    /*
-     * ============================================================
-     * POSTS
-     * ============================================================
-     */
-
-    async function loadPosts() {
-      const feed =
-        document.getElementById("postsFeed");
-
-      const status =
-        document.getElementById("postsStatus");
-
-      status.textContent = "Loading posts...";
-      feed.innerHTML = "";
-
-      const {
-        data,
-        error
-      } = await supabaseClient
-        .from("posts")
-        .select(
-          "id, title, category, content, username, created_at"
-        )
-        .order("created_at", {
-          ascending: false
-        })
-        .limit(100);
-
-      status.textContent = "";
-
-      if (error) {
-        console.error("Load posts error:", error);
-
-        setMessage(
-          "postsStatus",
-          "Error loading posts: " + error.message
-        );
-
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        feed.innerHTML =
-          "<p>No hosts files have been shared yet.</p>";
-
-        return;
-      }
-
-      /*
-       * Build DOM elements instead of injecting post content
-       * with innerHTML. This avoids XSS problems.
-       */
-      data.forEach((post) => {
-        feed.appendChild(createPostElement(post));
-      });
-    }
-
-    function createPostElement(post) {
-      const box = document.createElement("article");
-      box.className = "box";
-
-      const header =
-        document.createElement("div");
-
-      header.className = "post-header";
-
-      const title =
-        document.createElement("h3");
-
-      title.style.margin = "0";
-      title.textContent =
-        post.title || "Untitled";
-
-      const tag =
-        document.createElement("span");
-
-      tag.className = "tag";
-      tag.textContent =
-        post.category || "General";
-
-      header.appendChild(title);
-      header.appendChild(tag);
-
-      const meta =
-        document.createElement("div");
-
-      meta.className = "meta";
-
-      const username =
-        post.username || "Anonymous";
-
-      const date = formatDate(post.created_at);
-
-      meta.textContent =
-        `Posted by ${username} on ${date}`;
-
-      const pre =
-        document.createElement("pre");
-
-      pre.textContent =
-        post.content || "";
-
-      const copyButton =
-        document.createElement("button");
-
-      copyButton.type = "button";
-      copyButton.className = "btn-secondary";
-      copyButton.style.marginTop = "10px";
-      copyButton.textContent = "Copy Rules";
-
-      copyButton.addEventListener(
-        "click",
-        () =>
-          copyCode(
-            post.content || "",
-            copyButton
-          )
-      );
-
-      box.appendChild(header);
-      box.appendChild(meta);
-      box.appendChild(pre);
-      box.appendChild(copyButton);
-
-      return box;
-    }
-
-    async function createPost() {
-      const title =
-        document
-          .getElementById("postTitle")
-          .value
-          .trim();
-
-      const category =
-        document.getElementById("postCategory").value;
-
-      const content =
-        document
-          .getElementById("postContent")
-          .value
-          .trim();
-
-      const publishButton =
-        document.getElementById("publishButton");
-
-      setMessage("postMessage", "");
-
-      if (!currentUser) {
-        setMessage(
-          "postMessage",
-          "You must be logged in to publish."
-        );
-        return;
-      }
-
-      if (!title) {
-        setMessage(
-          "postMessage",
-          "Enter a title."
-        );
-        return;
-      }
-
-      if (title.length > 100) {
-        setMessage(
-          "postMessage",
-          "Title is too long."
-        );
-        return;
-      }
-
-      if (!content) {
-        setMessage(
-          "postMessage",
-          "Enter at least one hosts rule."
-        );
-        return;
-      }
-
-      if (content.length > 50000) {
-        setMessage(
-          "postMessage",
-          "Hosts content is too large."
-        );
-        return;
-      }
-
-      if (!ALLOWED_CATEGORIES.includes(category)) {
-        setMessage(
-          "postMessage",
-          "Invalid category."
-        );
-        return;
-      }
-
-      publishButton.disabled = true;
-      publishButton.textContent = "Publishing...";
-
-      try {
-        const {
-          error
-        } = await supabaseClient
-          .from("posts")
-          .insert({
-            user_id: currentUser.id,
-            username: currentUsername,
-            title,
-            category,
-            content
-          });
-
-        if (error) {
-          throw error;
-        }
-
-        document.getElementById(
-          "postTitle"
-        ).value = "";
-
-        document.getElementById(
-          "postContent"
-        ).value = "";
-
-        document.getElementById(
-          "postCategory"
-        ).value = "Adblocking";
-
-        setMessage(
-          "postMessage",
-          "Post published successfully.",
-          "success"
-        );
-
-        await loadPosts();
-
-      } catch (error) {
-        console.error("Create post error:", error);
-
-        setMessage(
-          "postMessage",
-          "Failed to publish: " +
-            (error?.message || "Unknown error")
-        );
-
-      } finally {
-        publishButton.disabled = false;
-        publishButton.textContent = "Publish Post";
-      }
-    }
-
-    /*
-     * ============================================================
-     * CLIPBOARD
-     * ============================================================
-     */
-
-    async function copyCode(text, button) {
-      try {
-        await navigator.clipboard.writeText(text);
-
-        const oldText = button.textContent;
-        button.textContent = "Copied ✓";
-
-        setTimeout(() => {
-          button.textContent = oldText;
-        }, 1500);
-
-      } catch (error) {
-        console.error("Clipboard error:", error);
-
-        /*
-         * Clipboard API often requires HTTPS or localhost.
-         */
-        alert(
-          "Could not copy automatically. Clipboard access normally requires HTTPS."
-        );
-      }
-    }
-
-    function formatDate(dateValue) {
-      if (!dateValue) {
-        return "Unknown date";
-      }
-
-      const date = new Date(dateValue);
-
-      if (Number.isNaN(date.getTime())) {
-        return "Unknown date";
-      }
-
-      return date.toLocaleString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
-      });
-    }
-
-    /*
-     * Allow Enter in password box to log in.
-     */
-    document
-      .getElementById("password")
-      .addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-          handleAuth("login");
-        }
-      });
-
-    /*
-     * Start application.
-     */
-    initializeApp();
-  </script>
 </body>
 </html>
+```
