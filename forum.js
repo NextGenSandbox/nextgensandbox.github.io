@@ -106,9 +106,68 @@ function hideAllPages() {
 }
 
 
+```javascript
 /* =========================================================
-   AUTH
+   AUTHENTICATION
    ========================================================= */
+
+let currentUser = null;
+let currentUsername = null;
+let isAnonymous = false;
+
+const authPage =
+  document.getElementById("authPage");
+
+const userbar =
+  document.getElementById("userbar");
+
+const usernameDisplay =
+  document.getElementById("usernameDisplay");
+
+const authMessage =
+  document.getElementById("authMessage");
+
+const usernameInput =
+  document.getElementById("usernameInput");
+
+const passwordInput =
+  document.getElementById("passwordInput");
+
+const authBtn =
+  document.getElementById("authBtn");
+
+let authMode = "login";
+
+
+function usernameToEmail(username) {
+  return `${username}@forum.androidhostfile.local`;
+}
+
+
+function validUsername(username) {
+  return /^[a-z0-9_-]{3,24}$/.test(username);
+}
+
+
+function showAuthMessage(message, success = false) {
+  authMessage.textContent = message;
+
+  authMessage.className =
+    success
+      ? "message-success"
+      : "message-error";
+}
+
+
+function clearAuthMessage() {
+  authMessage.textContent = "";
+  authMessage.className = "";
+}
+
+
+/* ---------------------------------------------------------
+   LOGIN TAB
+   --------------------------------------------------------- */
 
 document
   .getElementById("loginTab")
@@ -129,9 +188,13 @@ document
 
     authBtn.textContent = "Sign In";
 
-    clearMessage(authMessage);
+    clearAuthMessage();
   });
 
+
+/* ---------------------------------------------------------
+   REGISTER TAB
+   --------------------------------------------------------- */
 
 document
   .getElementById("registerTab")
@@ -152,23 +215,17 @@ document
 
     authBtn.textContent = "Create Account";
 
-    clearMessage(authMessage);
+    clearAuthMessage();
   });
 
+
+/* ---------------------------------------------------------
+   REGISTER / LOGIN
+   --------------------------------------------------------- */
 
 authBtn.addEventListener(
   "click",
   authenticate
-);
-
-
-passwordInput.addEventListener(
-  "keydown",
-  event => {
-    if (event.key === "Enter") {
-      authenticate();
-    }
-  }
 );
 
 
@@ -182,19 +239,17 @@ async function authenticate() {
   const password =
     passwordInput.value;
 
-  clearMessage(authMessage);
+  clearAuthMessage();
 
   if (!validUsername(username)) {
-    showMessage(
-      authMessage,
-      "Username must be 3–24 characters and contain only letters, numbers, underscores or hyphens."
+    showAuthMessage(
+      "Username must be 3–24 characters and use only letters, numbers, underscores or hyphens."
     );
     return;
   }
 
   if (password.length < 6) {
-    showMessage(
-      authMessage,
+    showAuthMessage(
       "Password must contain at least 6 characters."
     );
     return;
@@ -207,51 +262,118 @@ async function authenticate() {
     const email =
       usernameToEmail(username);
 
+
+    /* =====================================================
+       REGISTER
+       ===================================================== */
+
     if (authMode === "register") {
 
       authBtn.textContent =
         "Creating account...";
+
+
+      /*
+       * IMPORTANT:
+       *
+       * If this browser currently has an anonymous session,
+       * sign out first so the new registration is a completely
+       * separate permanent account.
+       */
+
+      const {
+        data: existingSession
+      } =
+        await supabaseClient.auth.getSession();
+
+
+      if (
+        existingSession?.session?.user
+        &&
+        existingSession.session.user.is_anonymous
+      ) {
+        await supabaseClient.auth.signOut();
+      }
+
 
       const {
         data,
         error
       } =
         await supabaseClient.auth.signUp({
+
           email,
+
           password,
+
           options: {
             data: {
               username
             }
           }
+
         });
+
 
       if (error) {
         throw error;
       }
 
+
+      /*
+       * Confirm email MUST be disabled for this
+       * username-only system.
+       */
+
       if (!data.session) {
-        showMessage(
-          authMessage,
-          "Account created, but email confirmation is enabled. Disable Confirm email in Supabase Authentication → Providers → Email."
+
+        showAuthMessage(
+          "Account created, but Supabase email confirmation is enabled. Turn Confirm email OFF in Authentication → Providers → Email."
         );
 
         return;
       }
 
+
       usernameInput.value = "";
       passwordInput.value = "";
 
-      await loginUser(
-        data.session.user
+      await activateRegisteredUser(
+        data.user
       );
 
       return;
     }
 
 
+    /* =====================================================
+       LOGIN
+       ===================================================== */
+
     authBtn.textContent =
       "Signing in...";
+
+
+    /*
+     * If we're currently anonymous, remove the temporary
+     * session before signing into the permanent account.
+     */
+
+    const {
+      data: currentSession
+    } =
+      await supabaseClient.auth.getSession();
+
+
+    if (
+      currentSession?.session?.user
+      &&
+      currentSession.session.user.is_anonymous
+    ) {
+
+      await supabaseClient.auth.signOut();
+    }
+
 
     const {
       data,
@@ -259,27 +381,37 @@ async function authenticate() {
     } =
       await supabaseClient.auth
         .signInWithPassword({
+
           email,
+
           password
+
         });
+
 
     if (error) {
       throw error;
     }
 
+
     usernameInput.value = "";
     passwordInput.value = "";
 
-    await loginUser(data.user);
+    await activateRegisteredUser(
+      data.user
+    );
+
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "Authentication error:",
+      error
+    );
 
-    showMessage(
-      authMessage,
+    showAuthMessage(
       error.message ||
-      "Authentication failed."
+      "Unable to sign in."
     );
 
   } finally {
@@ -294,17 +426,35 @@ async function authenticate() {
 }
 
 
-async function loginUser(user) {
+/* =========================================================
+   ACTIVATE REGISTERED ACCOUNT
+   ========================================================= */
+
+async function activateRegisteredUser(user) {
 
   currentUser = user;
+
+  isAnonymous =
+    Boolean(user.is_anonymous);
+
+
+  /*
+   * Get username from metadata first.
+   */
 
   let username =
     user.user_metadata?.username;
 
+
+  /*
+   * If metadata isn't available, get profile.
+   */
+
   if (!username) {
 
     const {
-      data
+      data,
+      error
     } =
       await supabaseClient
         .from("profiles")
@@ -312,18 +462,25 @@ async function loginUser(user) {
         .eq("id", user.id)
         .maybeSingle();
 
-    username =
-      data?.username;
+
+    if (!error) {
+      username =
+        data?.username;
+    }
   }
+
 
   currentUsername =
     username || "User";
 
+
   usernameDisplay.textContent =
     currentUsername;
 
+
   authPage.classList.add("hidden");
   userbar.classList.remove("hidden");
+
 
   await loadCategories();
   await loadThreads();
@@ -332,24 +489,86 @@ async function loginUser(user) {
 }
 
 
-function showForum() {
-  hideAllPages();
-  forumHome.classList.remove("hidden");
+/* =========================================================
+   CREATE ANONYMOUS SESSION
+   ========================================================= */
+
+async function createAnonymousSession() {
+
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth
+        .signInAnonymously();
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    if (!data?.user) {
+      throw new Error(
+        "Supabase did not return an anonymous user."
+      );
+    }
+
+
+    currentUser =
+      data.user;
+
+    isAnonymous = true;
+
+    currentUsername =
+      "Anonymous";
+
+
+    usernameDisplay.textContent =
+      "Anonymous";
+
+
+    userbar.classList.remove("hidden");
+    authPage.classList.add("hidden");
+
+
+    await loadCategories();
+    await loadThreads();
+
+    showForum();
+
+
+  } catch (error) {
+
+    console.error(
+      "Anonymous sign-in error:",
+      error
+    );
+
+    /*
+     * If anonymous sign-in is disabled, the visitor can
+     * still use the login/register screen.
+     */
+
+    currentUser = null;
+    isAnonymous = false;
+
+    userbar.classList.add("hidden");
+    authPage.classList.remove("hidden");
+
+    showAuthMessage(
+      "Could not create a guest session: " +
+      error.message
+    );
+  }
 }
 
 
-function setLoggedOut() {
-
-  currentUser = null;
-  currentUsername = null;
-
-  userbar.classList.add("hidden");
-
-  hideAllPages();
-
-  authPage.classList.remove("hidden");
-}
-
+/* =========================================================
+   LOGOUT
+   ========================================================= */
 
 document
   .getElementById("logoutBtn")
@@ -357,17 +576,211 @@ document
     "click",
     async () => {
 
-      const { error } =
+      try {
+
         await supabaseClient.auth.signOut();
 
-      if (error) {
-        alert(error.message);
-        return;
-      }
+        currentUser = null;
+        currentUsername = null;
+        isAnonymous = false;
 
-      setLoggedOut();
+        /*
+         * Immediately create another anonymous session so
+         * the visitor can continue browsing.
+         */
+
+        await createAnonymousSession();
+
+      } catch (error) {
+
+        console.error(error);
+
+        showAuthMessage(
+          "Could not log out: " +
+          error.message
+        );
+      }
     }
   );
+
+
+/* =========================================================
+   PROTECT POSTING
+   ========================================================= */
+
+function requireRegisteredUser() {
+
+  if (!currentUser) {
+
+    alert(
+      "Please sign in or create an account first."
+    );
+
+    return false;
+  }
+
+
+  if (isAnonymous || currentUser.is_anonymous) {
+
+    alert(
+      "Please create an account or sign in before posting."
+    );
+
+    return false;
+  }
+
+
+  return true;
+}
+
+
+/* =========================================================
+   AUTH STATE
+   ========================================================= */
+
+supabaseClient.auth.onAuthStateChange(
+  async (event, session) => {
+
+    if (!session?.user) {
+      return;
+    }
+
+
+    /*
+     * Anonymous user
+     */
+
+    if (session.user.is_anonymous) {
+
+      currentUser =
+        session.user;
+
+      currentUsername =
+        "Anonymous";
+
+      isAnonymous = true;
+
+      usernameDisplay.textContent =
+        "Anonymous";
+
+      userbar.classList.remove(
+        "hidden"
+      );
+
+      authPage.classList.add(
+        "hidden"
+      );
+
+      return;
+    }
+
+
+    /*
+     * Permanent user
+     */
+
+    if (
+      !currentUser ||
+      currentUser.id !== session.user.id
+    ) {
+
+      await activateRegisteredUser(
+        session.user
+      );
+    }
+
+  }
+);
+
+
+/* =========================================================
+   INITIAL STARTUP
+   ========================================================= */
+
+async function initializeAuth() {
+
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth
+        .getSession();
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    /*
+     * Existing session
+     */
+
+    if (data.session?.user) {
+
+      if (
+        data.session.user.is_anonymous
+      ) {
+
+        currentUser =
+          data.session.user;
+
+        currentUsername =
+          "Anonymous";
+
+        isAnonymous = true;
+
+        usernameDisplay.textContent =
+          "Anonymous";
+
+        userbar.classList.remove(
+          "hidden"
+        );
+
+        authPage.classList.add(
+          "hidden"
+        );
+
+        await loadCategories();
+        await loadThreads();
+
+        showForum();
+
+      } else {
+
+        await activateRegisteredUser(
+          data.session.user
+        );
+      }
+
+      return;
+    }
+
+
+    /*
+     * No session:
+     * create a guest session automatically.
+     */
+
+    await createAnonymousSession();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    showAuthMessage(
+      "Authentication startup failed: " +
+      error.message
+    );
+  }
+}
+
+
+initializeAuth();
+```
 
 
 /* =========================================================
