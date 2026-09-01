@@ -1,9 +1,23 @@
 ```javascript
+/* ============================================================
+   ANDROID HOST FILE
+   FORUM
+   SUPABASE #2
+
+   Guest system:
+   - Automatic anonymous Supabase user
+   - Random generated nickname
+   - Session persists in browser storage
+   - Optional username/password account
+   ============================================================ */
+
+
 const SUPABASE_URL =
   "https://hzazezszxbgethzkqmmf.supabase.co";
 
 const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YXplenN6eGJlZ3RoemtxbW1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNjA3NjQsImV4cCI6MjEwMzgzNjc2NH0.Vgi0AbiYnzPOD_uVafIMcUbNS-DbnD16BlVYTuHopQA";
+
 
 const supabaseClient =
   window.supabase.createClient(
@@ -11,288 +25,737 @@ const supabaseClient =
     SUPABASE_KEY
   );
 
+
+/* ============================================================
+   STATE
+   ============================================================ */
+
 let currentUser = null;
-let currentUsername = null;
+let currentUsername = "Anonymous";
+let isAnonymous = true;
+
 let categories = [];
 let currentThreadId = null;
-
-const authPage = document.getElementById("authPage");
-const forumHome = document.getElementById("forumHome");
-const newThreadPage = document.getElementById("newThreadPage");
-const threadPage = document.getElementById("threadPage");
-
-const userbar = document.getElementById("userbar");
-const usernameDisplay = document.getElementById("usernameDisplay");
-
-const authMessage = document.getElementById("authMessage");
-const usernameInput = document.getElementById("usernameInput");
-const passwordInput = document.getElementById("passwordInput");
-const authBtn = document.getElementById("authBtn");
-
-const categoryGrid = document.getElementById("categoryGrid");
-const categorySelect = document.getElementById("categorySelect");
-const threadCategory = document.getElementById("threadCategory");
-
-const searchInput = document.getElementById("searchInput");
-const threadsList = document.getElementById("threadsList");
-
-const threadContainer =
-  document.getElementById("threadContainer");
-
-const replyInput =
-  document.getElementById("replyInput");
-
-const replyMessage =
-  document.getElementById("replyMessage");
 
 let authMode = "login";
 
 
-/* =========================================================
-   HELPERS
-   ========================================================= */
+/* ============================================================
+   SHORTCUT
+   ============================================================ */
+
+const $ =
+  id => document.getElementById(id);
+
+
+/* ============================================================
+   SAFE HTML
+   ============================================================ */
 
 function escapeHtml(value) {
+
   return String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+
 }
 
 
-function usernameToEmail(username) {
-  return `${username}@forum.androidhostfile.local`;
+/* ============================================================
+   RANDOM GUEST NAME
+   ============================================================ */
+
+function generateGuestName() {
+
+  const adjectives = [
+
+    "Blue",
+    "Red",
+    "Green",
+    "Silent",
+    "Swift",
+    "Cool",
+    "Bright",
+    "Dark",
+    "Pixel",
+    "Turbo",
+    "Cyber",
+    "Lucky",
+    "Nova",
+    "Hidden",
+    "Rapid"
+
+  ];
+
+
+  const animals = [
+
+    "Fox",
+    "Wolf",
+    "Bear",
+    "Tiger",
+    "Eagle",
+    "Panda",
+    "Otter",
+    "Falcon",
+    "Raven",
+    "Dragon",
+    "Pixel",
+    "Byte",
+    "Lion",
+    "Cobra",
+    "Hawk"
+
+  ];
+
+
+  const adjective =
+    adjectives[
+      Math.floor(
+        Math.random() *
+        adjectives.length
+      )
+    ];
+
+
+  const animal =
+    animals[
+      Math.floor(
+        Math.random() *
+        animals.length
+      )
+    ];
+
+
+  const number =
+    Math.floor(
+      1000 +
+      Math.random() * 9000
+    );
+
+
+  return `${adjective}${animal}${number}`;
 }
 
 
-function validUsername(username) {
-  return /^[a-z0-9_-]{3,24}$/.test(username);
-}
-
+/* ============================================================
+   DATE
+   ============================================================ */
 
 function formatDate(value) {
-  const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) {
+  const date =
+    new Date(value);
+
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+
     return "Unknown date";
+
   }
 
+
   return date.toLocaleString();
+
 }
 
 
-function showMessage(element, text, type = "error") {
-  element.textContent = text;
+/* ============================================================
+   MESSAGE
+   ============================================================ */
+
+function showMessage(
+  element,
+  message,
+  success = false
+) {
+
+  element.textContent =
+    message;
 
   element.className =
-    type === "success"
+    success
       ? "message-success"
       : "message-error";
+
 }
 
 
 function clearMessage(element) {
+
   element.textContent = "";
   element.className = "";
+
 }
 
 
-function hideAllPages() {
-  forumHome.classList.add("hidden");
-  newThreadPage.classList.add("hidden");
-  threadPage.classList.add("hidden");
+/* ============================================================
+   PAGE NAVIGATION
+   ============================================================ */
+
+function showPage(page) {
+
+  $("forumHome")
+    .classList
+    .add("hidden");
+
+  $("newThreadPage")
+    .classList
+    .add("hidden");
+
+  $("threadPage")
+    .classList
+    .add("hidden");
+
+  $("accountPage")
+    .classList
+    .add("hidden");
+
+
+  page.classList.remove(
+    "hidden"
+  );
+
 }
 
 
-```javascript
-/* =========================================================
-   AUTHENTICATION
-   ========================================================= */
+/* ============================================================
+   USER UI
+   ============================================================ */
 
-let currentUser = null;
-let currentUsername = null;
-let isAnonymous = false;
+function updateUserUI() {
 
-const authPage =
-  document.getElementById("authPage");
-
-const userbar =
-  document.getElementById("userbar");
-
-const usernameDisplay =
-  document.getElementById("usernameDisplay");
-
-const authMessage =
-  document.getElementById("authMessage");
-
-const usernameInput =
-  document.getElementById("usernameInput");
-
-const passwordInput =
-  document.getElementById("passwordInput");
-
-const authBtn =
-  document.getElementById("authBtn");
-
-let authMode = "login";
+  $("usernameDisplay")
+    .textContent =
+    currentUsername;
 
 
-function usernameToEmail(username) {
-  return `${username}@forum.androidhostfile.local`;
+  $("userbar")
+    .classList
+    .remove("hidden");
+
+
+  if (isAnonymous) {
+
+    $("accountStatus")
+      .textContent =
+      `You're using the guest identity "${currentUsername}". Your guest session is stored in this browser. Create a permanent account later if you want a named account.`;
+
+
+    $("accountButton")
+      .textContent =
+      "Create Account";
+
+  } else {
+
+    $("accountStatus")
+      .textContent =
+      `You're signed in as "${currentUsername}".`;
+
+    $("accountButton")
+      .textContent =
+      "Account";
+
+  }
+
+
+  $("guestReplyNotice")
+    .textContent =
+    isAnonymous
+      ? `Posting as ${currentUsername}`
+      : `Replying as ${currentUsername}`;
+
 }
 
 
-function validUsername(username) {
-  return /^[a-z0-9_-]{3,24}$/.test(username);
+/* ============================================================
+   LOAD CURRENT SESSION
+   ============================================================ */
+
+async function initializeAuth() {
+
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .auth
+        .getSession();
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    if (
+      data.session?.user
+    ) {
+
+      currentUser =
+        data.session.user;
+
+
+      isAnonymous =
+        currentUser.is_anonymous === true;
+
+
+      /*
+       * Existing anonymous user.
+       */
+      if (isAnonymous) {
+
+        currentUsername =
+          currentUser
+            .user_metadata
+            ?.display_name ||
+          generateGuestName();
+
+
+        /*
+         * Make sure metadata contains the nickname.
+         */
+        if (
+          !currentUser.user_metadata
+            ?.display_name
+        ) {
+
+          const {
+            data: updated,
+            error: updateError
+          } =
+            await supabaseClient
+              .auth
+              .updateUser({
+                data: {
+                  display_name:
+                    currentUsername
+                }
+              });
+
+
+          if (
+            !updateError &&
+            updated?.user
+          ) {
+
+            currentUser =
+              updated.user;
+
+          }
+
+        }
+
+      } else {
+
+        currentUsername =
+          currentUser
+            .user_metadata
+            ?.username ||
+          "User";
+
+      }
+
+
+      updateUserUI();
+
+
+      await loadForum();
+
+
+      return;
+    }
+
+
+    /*
+     * No session.
+     *
+     * Create one automatically.
+     */
+    await createGuest();
+
+
+  } catch (error) {
+
+    console.error(
+      "Auth startup error:",
+      error
+    );
+
+
+    showMessage(
+      $("accountMessage"),
+      "Authentication failed: " +
+      error.message
+    );
+
+  }
+
 }
 
 
-function showAuthMessage(message, success = false) {
-  authMessage.textContent = message;
+/* ============================================================
+   CREATE GUEST
+   ============================================================ */
 
-  authMessage.className =
-    success
-      ? "message-success"
-      : "message-error";
+async function createGuest() {
+
+  const guestName =
+    generateGuestName();
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .auth
+      .signInAnonymously({
+
+        options: {
+
+          data: {
+            display_name:
+              guestName
+          }
+
+        }
+
+      });
+
+
+  if (error) {
+
+    console.error(
+      "Anonymous sign-in failed:",
+      error
+    );
+
+    /*
+     * Show the account screen if anonymous sign-in
+     * has not been enabled in Supabase.
+     */
+    $("authPage")
+      ?.classList
+      .remove("hidden");
+
+
+    showPage(
+      $("accountPage")
+    );
+
+
+    showMessage(
+      $("accountMessage"),
+      "Guest access is not enabled in Supabase. Turn on Authentication → Providers → Anonymous Sign-Ins."
+    );
+
+
+    return;
+  }
+
+
+  currentUser =
+    data.user;
+
+
+  currentUsername =
+    guestName;
+
+
+  isAnonymous = true;
+
+
+  updateUserUI();
+
+
+  await loadForum();
+
 }
 
 
-function clearAuthMessage() {
-  authMessage.textContent = "";
-  authMessage.className = "";
-}
+/* ============================================================
+   AUTH STATE LISTENER
+   ============================================================
+   DO NOT perform awaited Supabase calls here.
+   Supabase currently documents a deadlock risk when async
+   Supabase calls are made inside onAuthStateChange.
+   ============================================================ */
+
+supabaseClient.auth.onAuthStateChange(
+  (event, session) => {
+
+    if (!session?.user) {
+      return;
+    }
 
 
-/* ---------------------------------------------------------
-   LOGIN TAB
-   --------------------------------------------------------- */
-
-document
-  .getElementById("loginTab")
-  .addEventListener("click", () => {
-
-    authMode = "login";
-
-    document
-      .getElementById("loginTab")
-      .classList.add("active");
-
-    document
-      .getElementById("registerTab")
-      .classList.remove("active");
-
-    document.getElementById("authTitle")
-      .textContent = "Sign In";
-
-    authBtn.textContent = "Sign In";
-
-    clearAuthMessage();
-  });
+    currentUser =
+      session.user;
 
 
-/* ---------------------------------------------------------
-   REGISTER TAB
-   --------------------------------------------------------- */
-
-document
-  .getElementById("registerTab")
-  .addEventListener("click", () => {
-
-    authMode = "register";
-
-    document
-      .getElementById("registerTab")
-      .classList.add("active");
-
-    document
-      .getElementById("loginTab")
-      .classList.remove("active");
-
-    document.getElementById("authTitle")
-      .textContent = "Create Account";
-
-    authBtn.textContent = "Create Account";
-
-    clearAuthMessage();
-  });
+    isAnonymous =
+      currentUser.is_anonymous === true;
 
 
-/* ---------------------------------------------------------
-   REGISTER / LOGIN
-   --------------------------------------------------------- */
+    if (isAnonymous) {
 
-authBtn.addEventListener(
-  "click",
-  authenticate
+      currentUsername =
+        currentUser.user_metadata
+          ?.display_name ||
+        currentUsername ||
+        "Anonymous";
+
+    } else {
+
+      currentUsername =
+        currentUser.user_metadata
+          ?.username ||
+        currentUsername ||
+        "User";
+
+    }
+
+
+    updateUserUI();
+
+  }
 );
+
+
+/* ============================================================
+   ACCOUNT BUTTON
+   ============================================================ */
+
+$("accountButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      updateUserUI();
+
+      showPage(
+        $("accountPage")
+      );
+
+    }
+  );
+
+
+/* ============================================================
+   LOGIN TAB
+   ============================================================ */
+
+$("loginTab")
+  .addEventListener(
+    "click",
+    () => {
+
+      authMode = "login";
+
+      $("loginTab")
+        .classList
+        .add("active");
+
+      $("registerTab")
+        .classList
+        .remove("active");
+
+      $("authBtn")
+        .textContent =
+        "Sign In";
+
+      clearMessage(
+        $("accountMessage")
+      );
+
+    }
+  );
+
+
+/* ============================================================
+   REGISTER TAB
+   ============================================================ */
+
+$("registerTab")
+  .addEventListener(
+    "click",
+    () => {
+
+      authMode = "register";
+
+      $("registerTab")
+        .classList
+        .add("active");
+
+      $("loginTab")
+        .classList
+        .remove("active");
+
+      $("authBtn")
+        .textContent =
+        "Create Account";
+
+      clearMessage(
+        $("accountMessage")
+      );
+
+    }
+  );
+
+
+/* ============================================================
+   USERNAME → INTERNAL EMAIL
+   ============================================================ */
+
+function usernameToEmail(
+  username
+) {
+
+  return (
+    username +
+    "@forum.androidhostfile.local"
+  );
+
+}
+
+
+/* ============================================================
+   USERNAME VALIDATION
+   ============================================================ */
+
+function validUsername(
+  username
+) {
+
+  return /^[a-z0-9_-]{3,24}$/
+    .test(username);
+
+}
+
+
+/* ============================================================
+   LOGIN / REGISTER
+   ============================================================ */
+
+$("authBtn")
+  .addEventListener(
+    "click",
+    authenticate
+  );
+
+
+$("passwordInput")
+  .addEventListener(
+    "keydown",
+    event => {
+
+      if (
+        event.key === "Enter"
+      ) {
+
+        authenticate();
+
+      }
+
+    }
+  );
 
 
 async function authenticate() {
 
   const username =
-    usernameInput.value
+    $("usernameInput")
+      .value
       .trim()
       .toLowerCase();
 
+
   const password =
-    passwordInput.value;
+    $("passwordInput")
+      .value;
 
-  clearAuthMessage();
 
-  if (!validUsername(username)) {
-    showAuthMessage(
-      "Username must be 3–24 characters and use only letters, numbers, underscores or hyphens."
+  clearMessage(
+    $("accountMessage")
+  );
+
+
+  if (
+    !validUsername(username)
+  ) {
+
+    showMessage(
+      $("accountMessage"),
+      "Username must be 3–24 characters and contain only letters, numbers, underscores or hyphens."
     );
+
     return;
   }
 
-  if (password.length < 6) {
-    showAuthMessage(
+
+  if (
+    password.length < 6
+  ) {
+
+    showMessage(
+      $("accountMessage"),
       "Password must contain at least 6 characters."
     );
+
     return;
   }
 
-  authBtn.disabled = true;
+
+  $("authBtn").disabled = true;
+
 
   try {
 
     const email =
-      usernameToEmail(username);
+      usernameToEmail(
+        username
+      );
 
 
-    /* =====================================================
+    /* ======================================================
        REGISTER
-       ===================================================== */
+       ====================================================== */
 
-    if (authMode === "register") {
+    if (
+      authMode === "register"
+    ) {
 
-      authBtn.textContent =
-        "Creating account...";
+      $("authBtn")
+        .textContent =
+        "Creating Account...";
 
 
       /*
-       * IMPORTANT:
+       * Remove guest session first.
        *
-       * If this browser currently has an anonymous session,
-       * sign out first so the new registration is a completely
-       * separate permanent account.
+       * The guest remains a guest only until this point.
        */
-
-      const {
-        data: existingSession
-      } =
-        await supabaseClient.auth.getSession();
-
-
       if (
-        existingSession?.session?.user
-        &&
-        existingSession.session.user.is_anonymous
+        currentUser &&
+        currentUser.is_anonymous
       ) {
-        await supabaseClient.auth.signOut();
+
+        await supabaseClient
+          .auth
+          .signOut();
+
+        currentUser = null;
+
       }
 
 
@@ -300,19 +763,23 @@ async function authenticate() {
         data,
         error
       } =
-        await supabaseClient.auth.signUp({
+        await supabaseClient
+          .auth
+          .signUp({
 
-          email,
+            email,
 
-          password,
+            password,
 
-          options: {
-            data: {
-              username
+            options: {
+
+              data: {
+                username
+              }
+
             }
-          }
 
-        });
+          });
 
 
       if (error) {
@@ -320,58 +787,83 @@ async function authenticate() {
       }
 
 
-      /*
-       * Confirm email MUST be disabled for this
-       * username-only system.
-       */
-
       if (!data.session) {
 
-        showAuthMessage(
-          "Account created, but Supabase email confirmation is enabled. Turn Confirm email OFF in Authentication → Providers → Email."
+        showMessage(
+          $("accountMessage"),
+          "Account created, but Supabase did not return a session. Make sure Confirm email is OFF."
         );
 
         return;
+
       }
 
 
-      usernameInput.value = "";
-      passwordInput.value = "";
+      currentUser =
+        data.user;
 
-      await activateRegisteredUser(
-        data.user
+      currentUsername =
+        username;
+
+      isAnonymous = false;
+
+
+      $("usernameInput")
+        .value = "";
+
+      $("passwordInput")
+        .value = "";
+
+
+      updateUserUI();
+
+
+      await loadForum();
+
+
+      showMessage(
+        $("accountMessage"),
+        "Account created successfully!",
+        true
       );
 
+
+      setTimeout(
+        () => showPage(
+          $("forumHome")
+        ),
+        500
+      );
+
+
       return;
+
     }
 
 
-    /* =====================================================
+    /* ======================================================
        LOGIN
-       ===================================================== */
+       ====================================================== */
 
-    authBtn.textContent =
-      "Signing in...";
+    $("authBtn")
+      .textContent =
+      "Signing In...";
 
 
     /*
-     * If we're currently anonymous, remove the temporary
-     * session before signing into the permanent account.
+     * Remove the guest session first.
      */
-
-    const {
-      data: currentSession
-    } =
-      await supabaseClient.auth.getSession();
-
-
     if (
-      currentSession?.session?.user
-      &&
-      currentSession.session.user.is_anonymous
+      currentUser &&
+      currentUser.is_anonymous
     ) {
 
-      await supabaseClient.auth.signOut();
+      await supabaseClient
+        .auth
+        .signOut();
+
+      currentUser = null;
+
     }
 
 
@@ -379,7 +871,8 @@ async function authenticate() {
       data,
       error
     } =
-      await supabaseClient.auth
+      await supabaseClient
+        .auth
         .signInWithPassword({
 
           email,
@@ -394,398 +887,129 @@ async function authenticate() {
     }
 
 
-    usernameInput.value = "";
-    passwordInput.value = "";
-
-    await activateRegisteredUser(
-      data.user
-    );
-
-
-  } catch (error) {
-
-    console.error(
-      "Authentication error:",
-      error
-    );
-
-    showAuthMessage(
-      error.message ||
-      "Unable to sign in."
-    );
-
-  } finally {
-
-    authBtn.disabled = false;
-
-    authBtn.textContent =
-      authMode === "login"
-        ? "Sign In"
-        : "Create Account";
-  }
-}
-
-
-/* =========================================================
-   ACTIVATE REGISTERED ACCOUNT
-   ========================================================= */
-
-async function activateRegisteredUser(user) {
-
-  currentUser = user;
-
-  isAnonymous =
-    Boolean(user.is_anonymous);
-
-
-  /*
-   * Get username from metadata first.
-   */
-
-  let username =
-    user.user_metadata?.username;
-
-
-  /*
-   * If metadata isn't available, get profile.
-   */
-
-  if (!username) {
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .from("profiles")
-        .select("username")
-        .eq("id", user.id)
-        .maybeSingle();
-
-
-    if (!error) {
-      username =
-        data?.username;
-    }
-  }
-
-
-  currentUsername =
-    username || "User";
-
-
-  usernameDisplay.textContent =
-    currentUsername;
-
-
-  authPage.classList.add("hidden");
-  userbar.classList.remove("hidden");
-
-
-  await loadCategories();
-  await loadThreads();
-
-  showForum();
-}
-
-
-/* =========================================================
-   CREATE ANONYMOUS SESSION
-   ========================================================= */
-
-async function createAnonymousSession() {
-
-  try {
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.auth
-        .signInAnonymously();
-
-
-    if (error) {
-      throw error;
-    }
-
-
-    if (!data?.user) {
-      throw new Error(
-        "Supabase did not return an anonymous user."
-      );
-    }
-
-
     currentUser =
       data.user;
 
-    isAnonymous = true;
-
     currentUsername =
-      "Anonymous";
+      username;
+
+    isAnonymous = false;
 
 
-    usernameDisplay.textContent =
-      "Anonymous";
+    $("usernameInput")
+      .value = "";
+
+    $("passwordInput")
+      .value = "";
 
 
-    userbar.classList.remove("hidden");
-    authPage.classList.add("hidden");
+    updateUserUI();
 
 
-    await loadCategories();
-    await loadThreads();
+    await loadForum();
 
-    showForum();
+
+    showPage(
+      $("forumHome")
+    );
 
 
   } catch (error) {
 
     console.error(
-      "Anonymous sign-in error:",
+      "Authentication:",
       error
     );
 
-    /*
-     * If anonymous sign-in is disabled, the visitor can
-     * still use the login/register screen.
-     */
 
-    currentUser = null;
-    isAnonymous = false;
-
-    userbar.classList.add("hidden");
-    authPage.classList.remove("hidden");
-
-    showAuthMessage(
-      "Could not create a guest session: " +
-      error.message
+    showMessage(
+      $("accountMessage"),
+      error.message ||
+      "Authentication failed."
     );
+
+
+  } finally {
+
+    $("authBtn").disabled =
+      false;
+
+    $("authBtn")
+      .textContent =
+      authMode === "login"
+        ? "Sign In"
+        : "Create Account";
+
   }
+
 }
 
 
-/* =========================================================
-   LOGOUT
-   ========================================================= */
+/* ============================================================
+   NEW GUEST
+   ============================================================ */
 
-document
-  .getElementById("logoutBtn")
+$("logoutBtn")
   .addEventListener(
     "click",
     async () => {
 
       try {
 
-        await supabaseClient.auth.signOut();
+        await supabaseClient
+          .auth
+          .signOut();
+
 
         currentUser = null;
-        currentUsername = null;
-        isAnonymous = false;
+        currentUsername =
+          "Anonymous";
+        isAnonymous = true;
+
 
         /*
-         * Immediately create another anonymous session so
-         * the visitor can continue browsing.
+         * Get a new guest identity.
          */
+        await createGuest();
 
-        await createAnonymousSession();
 
       } catch (error) {
 
         console.error(error);
 
-        showAuthMessage(
-          "Could not log out: " +
+        alert(
+          "Could not create new guest: " +
           error.message
         );
+
       }
+
     }
   );
 
 
-/* =========================================================
-   PROTECT POSTING
-   ========================================================= */
+/* ============================================================
+   LOAD FORUM
+   ============================================================ */
 
-function requireRegisteredUser() {
+async function loadForum() {
 
-  if (!currentUser) {
+  await loadCategories();
 
-    alert(
-      "Please sign in or create an account first."
-    );
+  await loadThreads();
 
-    return false;
-  }
+  updateUserUI();
 
+  showPage(
+    $("forumHome")
+  );
 
-  if (isAnonymous || currentUser.is_anonymous) {
-
-    alert(
-      "Please create an account or sign in before posting."
-    );
-
-    return false;
-  }
-
-
-  return true;
 }
 
 
-/* =========================================================
-   AUTH STATE
-   ========================================================= */
-
-supabaseClient.auth.onAuthStateChange(
-  async (event, session) => {
-
-    if (!session?.user) {
-      return;
-    }
-
-
-    /*
-     * Anonymous user
-     */
-
-    if (session.user.is_anonymous) {
-
-      currentUser =
-        session.user;
-
-      currentUsername =
-        "Anonymous";
-
-      isAnonymous = true;
-
-      usernameDisplay.textContent =
-        "Anonymous";
-
-      userbar.classList.remove(
-        "hidden"
-      );
-
-      authPage.classList.add(
-        "hidden"
-      );
-
-      return;
-    }
-
-
-    /*
-     * Permanent user
-     */
-
-    if (
-      !currentUser ||
-      currentUser.id !== session.user.id
-    ) {
-
-      await activateRegisteredUser(
-        session.user
-      );
-    }
-
-  }
-);
-
-
-/* =========================================================
-   INITIAL STARTUP
-   ========================================================= */
-
-async function initializeAuth() {
-
-  try {
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.auth
-        .getSession();
-
-
-    if (error) {
-      throw error;
-    }
-
-
-    /*
-     * Existing session
-     */
-
-    if (data.session?.user) {
-
-      if (
-        data.session.user.is_anonymous
-      ) {
-
-        currentUser =
-          data.session.user;
-
-        currentUsername =
-          "Anonymous";
-
-        isAnonymous = true;
-
-        usernameDisplay.textContent =
-          "Anonymous";
-
-        userbar.classList.remove(
-          "hidden"
-        );
-
-        authPage.classList.add(
-          "hidden"
-        );
-
-        await loadCategories();
-        await loadThreads();
-
-        showForum();
-
-      } else {
-
-        await activateRegisteredUser(
-          data.session.user
-        );
-      }
-
-      return;
-    }
-
-
-    /*
-     * No session:
-     * create a guest session automatically.
-     */
-
-    await createAnonymousSession();
-
-
-  } catch (error) {
-
-    console.error(error);
-
-    showAuthMessage(
-      "Authentication startup failed: " +
-      error.message
-    );
-  }
-}
-
-
-initializeAuth();
-```
-
-
-/* =========================================================
+/* ============================================================
    CATEGORIES
-   ========================================================= */
+   ============================================================ */
 
 async function loadCategories() {
 
@@ -796,105 +1020,145 @@ async function loadCategories() {
     await supabaseClient
       .from("forum_categories")
       .select("*")
-      .order("sort_order", {
-        ascending: true
-      });
+      .order(
+        "sort_order",
+        {
+          ascending: true
+        }
+      );
+
 
   if (error) {
+
     console.error(error);
 
-    categoryGrid.innerHTML =
+    $("categoryGrid").innerHTML =
       `<div class="message-error">
-        ${escapeHtml(error.message)}
+        ${escapeHtml(
+          error.message
+        )}
       </div>`;
 
     return;
+
   }
 
-  categories = data || [];
 
-  categoryGrid.innerHTML =
+  categories =
+    data || [];
+
+
+  $("categoryGrid").innerHTML =
     categories
       .map(category => `
+
         <a
           href="#"
-          class="category-card"
-          data-id="${escapeHtml(category.id)}"
+          class="category"
+          data-category-id="${escapeHtml(category.id)}"
         >
 
           <div class="category-icon">
-            ${escapeHtml(category.icon || "📁")}
+            ${escapeHtml(
+              category.icon || "📁"
+            )}
           </div>
 
           <h3>
-            ${escapeHtml(category.name)}
+            ${escapeHtml(
+              category.name
+            )}
           </h3>
 
           <p>
-            ${escapeHtml(category.description || "")}
+            ${escapeHtml(
+              category.description || ""
+            )}
           </p>
 
         </a>
+
       `)
       .join("");
 
 
-  categorySelect.innerHTML =
+  $("categorySelect").innerHTML =
     `<option value="all">
       All Categories
     </option>`;
 
-  threadCategory.innerHTML = "";
+
+  $("threadCategory")
+    .innerHTML = "";
 
 
-  categories.forEach(category => {
+  categories.forEach(
+    category => {
 
-    const option =
-      document.createElement("option");
+      const option =
+        document.createElement(
+          "option"
+        );
 
-    option.value =
-      category.id;
 
-    option.textContent =
-      category.name;
+      option.value =
+        category.id;
 
-    categorySelect.appendChild(
-      option.cloneNode(true)
-    );
+      option.textContent =
+        category.name;
 
-    threadCategory.appendChild(
-      option
-    );
-  });
+
+      $("categorySelect")
+        .appendChild(
+          option.cloneNode(true)
+        );
+
+
+      $("threadCategory")
+        .appendChild(
+          option
+        );
+
+    }
+  );
 
 
   document
-    .querySelectorAll(".category-card")
-    .forEach(card => {
+    .querySelectorAll(
+      "[data-category-id]"
+    )
+    .forEach(
+      element => {
 
-      card.addEventListener(
-        "click",
-        event => {
+        element.addEventListener(
+          "click",
+          event => {
 
-          event.preventDefault();
+            event.preventDefault();
 
-          categorySelect.value =
-            card.dataset.id;
+            $("categorySelect")
+              .value =
+              element.dataset
+                .categoryId;
 
-          loadThreads();
-        }
-      );
-    });
+            loadThreads();
+
+          }
+        );
+
+      }
+    );
+
 }
 
 
-/* =========================================================
-   THREAD LIST
-   ========================================================= */
+/* ============================================================
+   LOAD THREADS
+   ============================================================ */
 
 async function loadThreads() {
 
-  threadsList.innerHTML =
+  $("threadsList").innerHTML =
     `<div class="empty">
       Loading discussions...
     </div>`;
@@ -918,89 +1182,116 @@ async function loadThreads() {
           icon
         )
       `)
-      .order("created_at", {
-        ascending: false
-      })
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      )
       .limit(100);
 
 
   const category =
-    categorySelect.value;
+    $("categorySelect")
+      .value;
+
 
   if (
     category &&
     category !== "all"
   ) {
+
     query =
       query.eq(
         "category_id",
         category
       );
+
   }
 
 
   const search =
-    searchInput.value.trim();
+    $("searchInput")
+      .value
+      .trim()
+      .replace(/[%_]/g, "");
+
 
   if (search) {
+
     query =
       query.or(
         `title.ilike.%${search}%,device.ilike.%${search}%,codename.ilike.%${search}%`
       );
+
   }
 
 
   const {
     data,
     error
-  } = await query;
+  } =
+    await query;
 
 
   if (error) {
 
     console.error(error);
 
-    threadsList.innerHTML =
+    $("threadsList").innerHTML =
       `<div class="message-error">
-        ${escapeHtml(error.message)}
+        ${escapeHtml(
+          error.message
+        )}
       </div>`;
 
     return;
+
   }
 
 
-  if (!data?.length) {
+  if (
+    !data ||
+    data.length === 0
+  ) {
 
-    threadsList.innerHTML =
+    $("threadsList").innerHTML =
       `<div class="empty">
         No discussions found.
       </div>`;
 
     return;
+
   }
 
 
-  threadsList.innerHTML =
+  $("threadsList").innerHTML =
     data
       .map(thread => {
 
         const category =
           thread.forum_categories;
 
+
         return `
+
           <a
             href="#"
-            class="thread-card"
-            data-thread="${escapeHtml(thread.id)}"
+            class="thread"
+            data-thread-id="${escapeHtml(thread.id)}"
           >
 
             <div class="thread-title">
-              ${escapeHtml(thread.title)}
+              ${escapeHtml(
+                thread.title
+              )}
             </div>
 
-            <div style="margin-bottom:7px">
+
+            <div>
 
               <span class="badge">
+
                 ${escapeHtml(
                   category?.icon || "📁"
                 )}
@@ -1008,13 +1299,18 @@ async function loadThreads() {
                 ${escapeHtml(
                   category?.name || "General"
                 )}
+
               </span>
 
+
               <span class="badge">
+
                 ${escapeHtml(
                   thread.thread_type
                 )}
+
               </span>
+
 
               ${
                 thread.device
@@ -1030,197 +1326,243 @@ async function loadThreads() {
 
             </div>
 
+
             <div class="thread-meta">
-              ${escapeHtml(thread.username)}
+
+              ${escapeHtml(
+                thread.username
+              )}
+
               •
-              ${formatDate(thread.created_at)}
+
+              ${formatDate(
+                thread.created_at
+              )}
 
               ${
                 thread.codename
-                  ? ` • ${escapeHtml(thread.codename)}`
+                  ? `
+                    •
+                    ${escapeHtml(
+                      thread.codename
+                    )}
+                  `
                   : ""
               }
+
             </div>
 
           </a>
+
         `;
+
       })
       .join("");
 
 
   document
-    .querySelectorAll("[data-thread]")
-    .forEach(element => {
+    .querySelectorAll(
+      "[data-thread-id]"
+    )
+    .forEach(
+      element => {
 
-      element.addEventListener(
-        "click",
-        event => {
+        element.addEventListener(
+          "click",
+          event => {
 
-          event.preventDefault();
+            event.preventDefault();
 
-          openThread(
-            element.dataset.thread
-          );
-        }
-      );
-    });
+            openThread(
+              element.dataset
+                .threadId
+            );
+
+          }
+        );
+
+      }
+    );
+
 }
 
 
-let searchTimer;
+/* ============================================================
+   SEARCH
+   ============================================================ */
 
-searchInput.addEventListener(
-  "input",
-  () => {
-
-    clearTimeout(searchTimer);
-
-    searchTimer =
-      setTimeout(
-        loadThreads,
-        250
-      );
-  }
-);
+let searchTimer = null;
 
 
-categorySelect.addEventListener(
-  "change",
-  loadThreads
-);
-
-
-/* =========================================================
-   NEW THREAD
-   ========================================================= */
-
-document
-  .getElementById("newThreadBtn")
+$("searchInput")
   .addEventListener(
-    "click",
+    "input",
     () => {
 
-      if (!currentUser) {
-        alert("Please sign in first.");
-        return;
-      }
-
-      clearMessage(
-        document.getElementById(
-          "threadMessage"
-        )
+      clearTimeout(
+        searchTimer
       );
 
-      showNewThread();
+
+      searchTimer =
+        setTimeout(
+          loadThreads,
+          250
+        );
+
     }
   );
 
 
-function showNewThread() {
-  hideAllPages();
-  newThreadPage.classList.remove("hidden");
-}
-
-
-document
-  .getElementById("backFromThreadBtn")
+$("categorySelect")
   .addEventListener(
-    "click",
-    showForum
+    "change",
+    loadThreads
   );
 
 
-/* =========================================================
-   CREATE THREAD
-   ========================================================= */
+/* ============================================================
+   NEW THREAD
+   ============================================================ */
 
-document
-  .getElementById("publishThreadBtn")
+$("newThreadBtn")
+  .addEventListener(
+    "click",
+    () => {
+
+      clearMessage(
+        $("threadMessage")
+      );
+
+      showPage(
+        $("newThreadPage")
+      );
+
+    }
+  );
+
+
+$("backNewThreadBtn")
+  .addEventListener(
+    "click",
+    () => {
+
+      showPage(
+        $("forumHome")
+      );
+
+    }
+  );
+
+
+/* ============================================================
+   CREATE THREAD
+   ============================================================ */
+
+$("publishThreadBtn")
   .addEventListener(
     "click",
     async () => {
 
       const message =
-        document.getElementById(
-          "threadMessage"
-        );
-
-      const title =
-        document.getElementById(
-          "threadTitle"
-        ).value.trim();
-
-      const categoryId =
-        threadCategory.value;
-
-      const type =
-        document.getElementById(
-          "threadType"
-        ).value;
-
-      const device =
-        document.getElementById(
-          "threadDevice"
-        ).value.trim();
-
-      const codename =
-        document.getElementById(
-          "threadCodename"
-        ).value.trim();
-
-      const androidVersion =
-        document.getElementById(
-          "threadAndroid"
-        ).value.trim();
-
-      const content =
-        document.getElementById(
-          "threadContent"
-        ).value.trim();
-
-      const button =
-        document.getElementById(
-          "publishThreadBtn"
-        );
+        $("threadMessage");
 
 
       clearMessage(message);
 
 
       if (!currentUser) {
+
         showMessage(
           message,
-          "You must be logged in."
+          "You don't have a forum identity yet."
         );
+
         return;
+
       }
 
 
-      if (title.length < 3) {
+      const title =
+        $("threadTitle")
+          .value
+          .trim();
+
+
+      const categoryId =
+        $("threadCategory")
+          .value;
+
+
+      const type =
+        $("threadType")
+          .value;
+
+
+      const device =
+        $("threadDevice")
+          .value
+          .trim();
+
+
+      const codename =
+        $("threadCodename")
+          .value
+          .trim();
+
+
+      const android =
+        $("threadAndroid")
+          .value
+          .trim();
+
+
+      const content =
+        $("threadContent")
+          .value
+          .trim();
+
+
+      if (
+        title.length < 3
+      ) {
+
         showMessage(
           message,
-          "Enter a longer title."
+          "Enter a thread title."
         );
+
         return;
+
       }
 
 
       if (!categoryId) {
+
         showMessage(
           message,
-          "Select a category."
+          "Choose a category."
         );
+
         return;
+
       }
 
 
       if (!content) {
+
         showMessage(
           message,
           "Write something in your post."
         );
+
         return;
+
       }
+
+
+      const button =
+        $("publishThreadBtn");
 
 
       button.disabled = true;
@@ -1236,6 +1578,7 @@ document
           await supabaseClient
             .from("forum_threads")
             .insert({
+
               user_id:
                 currentUser.id,
 
@@ -1257,9 +1600,10 @@ document
                 codename || null,
 
               android_version:
-                androidVersion || null,
+                android || null,
 
               content
+
             });
 
 
@@ -1268,40 +1612,18 @@ document
         }
 
 
-        document.getElementById(
-          "threadTitle"
-        ).value = "";
-
-        document.getElementById(
-          "threadDevice"
-        ).value = "";
-
-        document.getElementById(
-          "threadCodename"
-        ).value = "";
-
-        document.getElementById(
-          "threadAndroid"
-        ).value = "";
-
-        document.getElementById(
-          "threadContent"
-        ).value = "";
-
-
-        showMessage(
-          message,
-          "Thread published!",
-          "success"
-        );
+        $("threadTitle").value = "";
+        $("threadDevice").value = "";
+        $("threadCodename").value = "";
+        $("threadAndroid").value = "";
+        $("threadContent").value = "";
 
 
         await loadThreads();
 
 
-        setTimeout(
-          showForum,
-          500
+        showPage(
+          $("forumHome")
         );
 
 
@@ -1311,31 +1633,41 @@ document
 
         showMessage(
           message,
-          error.message ||
-          "Could not publish thread."
+          "Could not publish: " +
+          error.message
         );
 
       } finally {
 
         button.disabled = false;
+
         button.textContent =
           "Publish Thread";
+
       }
+
     }
   );
 
 
-/* =========================================================
+/* ============================================================
    OPEN THREAD
-   ========================================================= */
+   ============================================================ */
 
-async function openThread(threadId) {
+async function openThread(
+  threadId
+) {
 
-  currentThreadId = threadId;
+  currentThreadId =
+    threadId;
 
-  showThread();
 
-  threadContainer.innerHTML =
+  showPage(
+    $("threadPage")
+  );
+
+
+  $("threadContainer").innerHTML =
     `<div class="empty">
       Loading thread...
     </div>`;
@@ -1354,18 +1686,24 @@ async function openThread(threadId) {
           icon
         )
       `)
-      .eq("id", threadId)
+      .eq(
+        "id",
+        threadId
+      )
       .single();
 
 
   if (threadError) {
 
-    threadContainer.innerHTML =
+    $("threadContainer").innerHTML =
       `<div class="message-error">
-        ${escapeHtml(threadError.message)}
+        ${escapeHtml(
+          threadError.message
+        )}
       </div>`;
 
     return;
+
   }
 
 
@@ -1376,20 +1714,29 @@ async function openThread(threadId) {
     await supabaseClient
       .from("forum_replies")
       .select("*")
-      .eq("thread_id", threadId)
-      .order("created_at", {
-        ascending: true
-      });
+      .eq(
+        "thread_id",
+        threadId
+      )
+      .order(
+        "created_at",
+        {
+          ascending: true
+        }
+      );
 
 
   if (repliesError) {
 
-    threadContainer.innerHTML =
+    $("threadContainer").innerHTML =
       `<div class="message-error">
-        ${escapeHtml(repliesError.message)}
+        ${escapeHtml(
+          repliesError.message
+        )}
       </div>`;
 
     return;
+
   }
 
 
@@ -1397,77 +1744,108 @@ async function openThread(threadId) {
     thread,
     replies || []
   );
+
 }
 
 
-/* =========================================================
+/* ============================================================
    RENDER THREAD
-   ========================================================= */
+   ============================================================ */
 
-function renderThread(thread, replies) {
+function renderThread(
+  thread,
+  replies
+) {
 
-  let html = "";
+  let html = `
 
-
-  html += `
     <div class="box">
 
       <h2>
-        ${escapeHtml(thread.title)}
+        ${escapeHtml(
+          thread.title
+        )}
       </h2>
 
-      <div style="margin:10px 0">
+
+      <div style="margin-top:10px">
 
         <span class="badge">
+
           ${escapeHtml(
-            thread.forum_categories?.icon || "📁"
+            thread.forum_categories
+              ?.icon || "📁"
           )}
 
           ${escapeHtml(
-            thread.forum_categories?.name || "General"
+            thread.forum_categories
+              ?.name || "General"
           )}
+
         </span>
 
+
         <span class="badge">
-          ${escapeHtml(thread.thread_type)}
+
+          ${escapeHtml(
+            thread.thread_type
+          )}
+
         </span>
 
       </div>
+
 
       ${
         thread.device ||
         thread.codename ||
         thread.android_version
           ? `
+
             <div class="device-box">
 
               ${
                 thread.device
                   ? `
                     <div>
-                      <strong>Device:</strong>
-                      ${escapeHtml(thread.device)}
+                      <strong>
+                        Device:
+                      </strong>
+
+                      ${escapeHtml(
+                        thread.device
+                      )}
                     </div>
                   `
                   : ""
               }
+
 
               ${
                 thread.codename
                   ? `
                     <div>
-                      <strong>Codename:</strong>
-                      ${escapeHtml(thread.codename)}
+                      <strong>
+                        Codename:
+                      </strong>
+
+                      ${escapeHtml(
+                        thread.codename
+                      )}
                     </div>
                   `
                   : ""
               }
 
+
               ${
                 thread.android_version
                   ? `
                     <div>
-                      <strong>Android:</strong>
+                      <strong>
+                        Android:
+                      </strong>
+
                       ${escapeHtml(
                         thread.android_version
                       )}
@@ -1477,138 +1855,147 @@ function renderThread(thread, replies) {
               }
 
             </div>
+
           `
           : ""
       }
 
     </div>
+
   `;
 
 
-  html += renderPost(
-    thread.username,
-    thread.created_at,
-    thread.content,
-    thread.user_id === currentUser?.id,
-    `deleteThread('${thread.id}')`
-  );
-
-
-  replies.forEach(reply => {
-
-    html += renderPost(
-      reply.username,
-      reply.created_at,
-      reply.content,
-      reply.user_id === currentUser?.id,
-      `deleteReply('${reply.id}')`
-    );
-  });
-
-
-  threadContainer.innerHTML =
-    html;
-
-  clearMessage(replyMessage);
-  replyInput.value = "";
-}
-
-
-function renderPost(
-  username,
-  date,
-  content,
-  canDelete,
-  deleteFunction
-) {
-
-  return `
+  html += `
     <article class="post">
 
       <div class="post-header">
 
         <span class="post-user">
-          ${escapeHtml(username)}
+          ${escapeHtml(
+            thread.username
+          )}
         </span>
 
         <span class="post-date">
-          ${formatDate(date)}
+          ${formatDate(
+            thread.created_at
+          )}
         </span>
 
       </div>
 
+
       <div class="post-body">
-        ${escapeHtml(content)}
+        ${escapeHtml(
+          thread.content
+        )}
       </div>
-
-      ${
-        canDelete
-          ? `
-            <div class="post-actions">
-
-              <button
-                class="button red"
-                onclick="${deleteFunction}"
-              >
-                Delete
-              </button>
-
-            </div>
-          `
-          : ""
-      }
 
     </article>
   `;
+
+
+  replies.forEach(
+    reply => {
+
+      html += `
+
+        <article class="post">
+
+          <div class="post-header">
+
+            <span class="post-user">
+              ${escapeHtml(
+                reply.username
+              )}
+            </span>
+
+            <span class="post-date">
+              ${formatDate(
+                reply.created_at
+              )}
+            </span>
+
+          </div>
+
+
+          <div class="post-body">
+            ${escapeHtml(
+              reply.content
+            )}
+          </div>
+
+        </article>
+
+      `;
+
+    }
+  );
+
+
+  $("threadContainer").innerHTML =
+    html;
+
+
+  $("replyInput").value = "";
+
+  $("guestReplyNotice")
+    .textContent =
+    `Posting as ${currentUsername}`;
+
 }
 
 
-function showThread() {
-  hideAllPages();
-  threadPage.classList.remove("hidden");
-}
-
-
-/* =========================================================
+/* ============================================================
    REPLY
-   ========================================================= */
+   ============================================================ */
 
-document
-  .getElementById("replyBtn")
+$("replyBtn")
   .addEventListener(
     "click",
     async () => {
 
-      clearMessage(replyMessage);
+      clearMessage(
+        $("replyMessage")
+      );
+
 
       if (!currentUser) {
+
         showMessage(
-          replyMessage,
-          "You must be logged in."
+          $("replyMessage"),
+          "No forum session exists."
         );
+
         return;
+
       }
 
 
       const content =
-        replyInput.value.trim();
+        $("replyInput")
+          .value
+          .trim();
 
 
       if (!content) {
+
         showMessage(
-          replyMessage,
+          $("replyMessage"),
           "Write a reply first."
         );
+
         return;
+
       }
 
 
       const button =
-        document.getElementById(
-          "replyBtn"
-        );
+        $("replyBtn");
+
 
       button.disabled = true;
+
       button.textContent =
         "Posting...";
 
@@ -1621,6 +2008,7 @@ document
           await supabaseClient
             .from("forum_replies")
             .insert({
+
               thread_id:
                 currentThreadId,
 
@@ -1631,6 +2019,7 @@ document
                 currentUsername,
 
               content
+
             });
 
 
@@ -1649,189 +2038,63 @@ document
         console.error(error);
 
         showMessage(
-          replyMessage,
-          error.message ||
-          "Could not post reply."
+          $("replyMessage"),
+          "Could not post reply: " +
+          error.message
         );
 
       } finally {
 
-        button.disabled = false;
+        button.disabled =
+          false;
+
         button.textContent =
           "Post Reply";
+
       }
+
     }
   );
 
 
-/* =========================================================
-   DELETE THREAD
-   ========================================================= */
-
-async function deleteThread(threadId) {
-
-  if (!currentUser) {
-    return;
-  }
-
-
-  if (
-    !confirm(
-      "Delete this thread and all replies?"
-    )
-  ) {
-    return;
-  }
-
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("forum_threads")
-      .delete()
-      .eq("id", threadId)
-      .eq("user_id", currentUser.id);
-
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-
-  currentThreadId = null;
-
-  await loadThreads();
-  showForum();
-}
-
-
-/* =========================================================
-   DELETE REPLY
-   ========================================================= */
-
-async function deleteReply(replyId) {
-
-  if (!currentUser) {
-    return;
-  }
-
-
-  if (
-    !confirm(
-      "Delete this reply?"
-    )
-  ) {
-    return;
-  }
-
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("forum_replies")
-      .delete()
-      .eq("id", replyId)
-      .eq("user_id", currentUser.id);
-
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-
-  await openThread(
-    currentThreadId
-  );
-}
-
-
-/* =========================================================
+/* ============================================================
    BACK
-   ========================================================= */
+   ============================================================ */
 
-document
-  .getElementById("backToForumBtn")
+$("backForumBtn")
   .addEventListener(
     "click",
     async () => {
 
-      currentThreadId = null;
+      currentThreadId =
+        null;
 
       await loadThreads();
 
-      showForum();
+      showPage(
+        $("forumHome")
+      );
+
     }
   );
 
 
-/* =========================================================
-   AUTH STATE
-   ========================================================= */
+$("backAccountBtn")
+  .addEventListener(
+    "click",
+    () => {
 
-supabaseClient.auth.onAuthStateChange(
-  async (event, session) => {
-
-    if (
-      session?.user &&
-      !currentUser
-    ) {
-      await loginUser(
-        session.user
+      showPage(
+        $("forumHome")
       );
+
     }
-
-    if (!session) {
-      setLoggedOut();
-    }
-  }
-);
+  );
 
 
-/* =========================================================
+/* ============================================================
    START
-   ========================================================= */
+   ============================================================ */
 
-(async function start() {
-
-  try {
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.auth.getSession();
-
-    if (error) {
-      throw error;
-    }
-
-
-    if (data.session?.user) {
-
-      await loginUser(
-        data.session.user
-      );
-
-    } else {
-
-      setLoggedOut();
-
-    }
-
-  } catch (error) {
-
-    console.error(error);
-
-    showMessage(
-      authMessage,
-      "Supabase connection failed: " +
-      error.message
-    );
-  }
-
-})();
+initializeAuth();
 ```
