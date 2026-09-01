@@ -1,8 +1,12 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>Android Host File – Forum</title>
 
@@ -27,8 +31,19 @@
       padding: 0;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
       background: var(--bg);
       color: var(--text);
       line-height: 1.5;
@@ -52,11 +67,21 @@
 
     .container {
       width: min(1100px, calc(100% - 32px));
-      margin: auto;
+      margin: 0 auto;
     }
 
+    /* =====================================================
+       HEADER
+       ===================================================== */
+
     header {
-      background: linear-gradient(180deg, #111827 0%, var(--bg) 100%);
+      background:
+        linear-gradient(
+          180deg,
+          #111827 0%,
+          var(--bg) 100%
+        );
+
       border-bottom: 1px solid var(--border);
       padding: 28px 0;
     }
@@ -71,46 +96,63 @@
     .brand h1 {
       color: #fff;
       font-size: 1.9rem;
+      line-height: 1.2;
     }
 
     .brand p {
       color: var(--muted);
       font-size: .9rem;
+      margin-top: 5px;
     }
 
     nav {
       display: flex;
-      gap: 8px;
       flex-wrap: wrap;
+      gap: 7px;
     }
 
     nav a {
-      text-decoration: none;
       color: var(--muted);
+      text-decoration: none;
       padding: 8px 12px;
       border-radius: 8px;
+      transition: .15s;
     }
 
     nav a:hover,
     nav a.active {
-      background: var(--card);
       color: white;
+      background: var(--card);
     }
+
+    /* =====================================================
+       USER BAR
+       ===================================================== */
 
     .userbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
+
       margin-top: 18px;
       padding: 12px 15px;
+
+      background: rgba(26, 29, 36, .8);
       border: 1px solid var(--border);
       border-radius: 10px;
-      background: rgba(26, 29, 36, .8);
     }
 
+    #usernameDisplay {
+      color: #93c5fd;
+    }
+
+    /* =====================================================
+       MAIN
+       ===================================================== */
+
     main {
-      padding: 25px 0 60px;
+      padding: 28px 0 60px;
     }
 
     .hidden {
@@ -126,7 +168,7 @@
     }
 
     .box h2 {
-      color: #fff;
+      color: white;
       margin-bottom: 7px;
     }
 
@@ -134,13 +176,33 @@
       color: var(--muted);
     }
 
+    /* =====================================================
+       BUTTONS
+       ===================================================== */
+
     .button {
       border: none;
       border-radius: 8px;
       padding: 10px 16px;
+
       background: var(--accent);
       color: white;
+
       font-weight: 700;
+      transition: opacity .15s, transform .1s;
+    }
+
+    .button:hover:not(:disabled) {
+      opacity: .9;
+    }
+
+    .button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
     }
 
     .button.green {
@@ -155,26 +217,24 @@
       background: var(--danger);
     }
 
-    .button:disabled {
-      opacity: .5;
-      cursor: not-allowed;
-    }
+    /* =====================================================
+       INPUTS
+       ===================================================== */
 
     input,
     textarea,
     select {
       width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 8px;
+
       padding: 11px 13px;
+
       background: var(--card2);
       color: white;
-      outline: none;
-    }
 
-    textarea {
-      min-height: 160px;
-      resize: vertical;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+
+      outline: none;
     }
 
     input:focus,
@@ -183,11 +243,18 @@
       border-color: var(--accent);
     }
 
+    textarea {
+      min-height: 160px;
+      resize: vertical;
+    }
+
     label {
       display: block;
+
       color: #d1d5db;
       font-size: .9rem;
       font-weight: 600;
+
       margin-bottom: 6px;
     }
 
@@ -195,24 +262,33 @@
       margin-bottom: 15px;
     }
 
+    /* =====================================================
+       AUTH
+       ===================================================== */
+
     .auth-card {
-      max-width: 450px;
+      width: min(450px, 100%);
       margin: 40px auto;
     }
 
     .auth-tabs {
       display: flex;
       gap: 5px;
-      margin-bottom: 18px;
+      margin: 20px 0;
     }
 
     .auth-tabs button {
       flex: 1;
+
       border: none;
-      padding: 10px;
       border-radius: 7px;
+
+      padding: 10px;
+
       background: #374151;
       color: white;
+
+      font-weight: 600;
     }
 
     .auth-tabs button.active {
@@ -222,38 +298,51 @@
     .message-error {
       color: #f87171;
       font-weight: 600;
-      margin: 10px 0;
+      margin: 10px 0 15px;
     }
 
     .message-success {
       color: #34d399;
       font-weight: 600;
-      margin: 10px 0;
+      margin: 10px 0 15px;
     }
+
+    /* =====================================================
+       CATEGORIES
+       ===================================================== */
 
     .category-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns:
+        repeat(auto-fit, minmax(240px, 1fr));
+
       gap: 14px;
-      margin: 20px 0 28px;
+
+      margin: 20px 0 30px;
     }
 
     .category-card {
+      display: block;
+
+      text-decoration: none;
+
       padding: 18px;
+
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 12px;
-      text-decoration: none;
+
       transition: .15s;
     }
 
     .category-card:hover {
       border-color: var(--accent);
+      background: #1d222b;
       transform: translateY(-2px);
     }
 
     .category-icon {
-      font-size: 1.8rem;
+      font-size: 1.9rem;
       margin-bottom: 7px;
     }
 
@@ -267,6 +356,10 @@
       font-size: .85rem;
     }
 
+    /* =====================================================
+       TOOLBAR
+       ===================================================== */
+
     .toolbar {
       display: flex;
       gap: 10px;
@@ -277,26 +370,40 @@
       flex: 1;
     }
 
+    /* =====================================================
+       THREAD LIST
+       ===================================================== */
+
     .thread-card {
       display: block;
-      text-decoration: none;
+
       padding: 17px;
       margin-bottom: 10px;
+
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 12px;
+
+      text-decoration: none;
+
+      transition: .15s;
     }
 
     .thread-card:hover {
       border-color: var(--accent);
       background: #1d222b;
+      transform: translateY(-1px);
     }
 
     .thread-title {
-      color: #fff;
+      color: white;
+
       font-size: 1.05rem;
       font-weight: 700;
+
       margin-bottom: 8px;
+
+      overflow-wrap: anywhere;
     }
 
     .thread-meta {
@@ -306,29 +413,46 @@
 
     .badge {
       display: inline-block;
+
       background: #1e293b;
       color: #93c5fd;
+
       padding: 3px 8px;
+
       border-radius: 5px;
+
       font-size: .72rem;
+
       margin-right: 5px;
       margin-bottom: 4px;
     }
 
+    /* =====================================================
+       THREAD VIEW
+       ===================================================== */
+
     .post {
       background: var(--card);
+
       border: 1px solid var(--border);
       border-radius: 12px;
+
       overflow: hidden;
+
       margin-bottom: 15px;
     }
 
     .post-header {
       display: flex;
       justify-content: space-between;
+      align-items: center;
+
       gap: 10px;
+
       padding: 12px 15px;
+
       background: #161a21;
+
       border-bottom: 1px solid var(--border);
     }
 
@@ -344,6 +468,7 @@
 
     .post-body {
       padding: 18px;
+
       white-space: pre-wrap;
       overflow-wrap: anywhere;
     }
@@ -354,28 +479,55 @@
 
     .device-box {
       border-left: 3px solid var(--accent);
+
       background: #111827;
+
       padding: 12px;
+
       border-radius: 5px;
-      margin-bottom: 16px;
+
+      margin-top: 15px;
+    }
+
+    .device-box div {
+      margin: 3px 0;
     }
 
     .empty {
       text-align: center;
+
       color: var(--muted);
+
       padding: 30px;
     }
 
+    /* =====================================================
+       FOOTER
+       ===================================================== */
+
     footer {
       border-top: 1px solid var(--border);
+
       padding: 24px 0;
-      text-align: center;
+
       color: var(--muted);
+
+      text-align: center;
+
       font-size: .8rem;
     }
 
+    /* =====================================================
+       MOBILE
+       ===================================================== */
+
     @media (max-width: 700px) {
-      .header-top,
+
+      .header-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
       .userbar {
         flex-direction: column;
         align-items: flex-start;
@@ -384,64 +536,147 @@
       .toolbar {
         flex-direction: column;
       }
+
+      .brand h1 {
+        font-size: 1.6rem;
+      }
+
     }
   </style>
 </head>
 
+
 <body>
 
+
+<!-- ========================================================
+     HEADER
+     ======================================================== -->
+
 <header>
+
   <div class="container">
 
     <div class="header-top">
 
       <div class="brand">
-        <h1>Android Host File</h1>
-        <p>TWRP • Custom ROMs • Odin Firmware • Kernels</p>
+
+        <h1>
+          Android Host File
+        </h1>
+
+        <p>
+          TWRP • Custom ROMs • Odin Firmware • Kernels
+        </p>
+
       </div>
 
+
       <nav>
-        <a href="index.html">Downloads</a>
-        <a href="forum.html" class="active">Forum</a>
+
+        <a href="index.html">
+          Downloads
+        </a>
+
+        <a
+          href="forum.html"
+          class="active"
+        >
+          Forum
+        </a>
+
       </nav>
 
     </div>
 
-    <div id="userbar" class="userbar hidden">
+
+    <!-- USER SESSION -->
+
+    <div
+      id="userbar"
+      class="userbar hidden"
+    >
+
       <div>
+
         Logged in as:
-        <strong id="usernameDisplay"></strong>
+
+        <strong id="usernameDisplay">
+          Anonymous
+        </strong>
+
       </div>
 
-      <button id="logoutBtn" class="button gray">
+
+      <button
+        id="logoutBtn"
+        class="button gray"
+        type="button"
+      >
         Log Out
       </button>
+
     </div>
 
   </div>
+
 </header>
 
 
+<!-- ========================================================
+     MAIN
+     ======================================================== -->
+
 <main class="container">
 
-  <!-- LOGIN -->
-  <section id="authPage" class="box auth-card">
 
-    <h2 id="authTitle">Sign In</h2>
+  <!-- ======================================================
+       LOGIN / REGISTER
+       ====================================================== -->
 
-    <p class="muted" style="margin-bottom:18px">
-      Login to participate in the Android Host File forum.
+  <section
+    id="authPage"
+    class="box auth-card"
+  >
+
+    <h2 id="authTitle">
+      Sign In
+    </h2>
+
+    <p class="muted">
+      Create an account to start discussions and reply.
     </p>
 
+
     <div class="auth-tabs">
-      <button id="loginTab" class="active">Sign In</button>
-      <button id="registerTab">Register</button>
+
+      <button
+        id="loginTab"
+        class="active"
+        type="button"
+      >
+        Sign In
+      </button>
+
+
+      <button
+        id="registerTab"
+        type="button"
+      >
+        Register
+      </button>
+
     </div>
+
 
     <div id="authMessage"></div>
 
+
     <div class="form-group">
-      <label for="usernameInput">Username</label>
+
+      <label for="usernameInput">
+        Username
+      </label>
 
       <input
         id="usernameInput"
@@ -450,22 +685,31 @@
         autocomplete="username"
         placeholder="Your username"
       >
+
     </div>
 
+
     <div class="form-group">
-      <label for="passwordInput">Password</label>
+
+      <label for="passwordInput">
+        Password
+      </label>
 
       <input
         id="passwordInput"
         type="password"
         maxlength="128"
+        autocomplete="current-password"
         placeholder="At least 6 characters"
       >
+
     </div>
+
 
     <button
       id="authBtn"
       class="button"
+      type="button"
       style="width:100%"
     >
       Sign In
@@ -474,28 +718,42 @@
   </section>
 
 
-  <!-- FORUM HOME -->
-  <section id="forumHome" class="hidden">
+  <!-- ======================================================
+       FORUM HOME
+       ====================================================== -->
 
-    <div style="
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:15px;
-      margin-bottom:15px;
-    ">
+  <section
+    id="forumHome"
+    class="hidden"
+  >
+
+    <div
+      style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:15px;
+        margin-bottom:15px;
+      "
+    >
 
       <div>
-        <h2>Forum</h2>
+
+        <h2>
+          Forum
+        </h2>
 
         <p class="muted">
-          Custom ROMs, TWRP, root, kernels and Android development.
+          Custom ROMs, recoveries, root, kernels and Android development.
         </p>
+
       </div>
+
 
       <button
         id="newThreadBtn"
         class="button green"
+        type="button"
       >
         + New Thread
       </button>
@@ -503,21 +761,31 @@
     </div>
 
 
-    <div id="categoryGrid" class="category-grid"></div>
+    <!-- CATEGORIES -->
 
+    <div
+      id="categoryGrid"
+      class="category-grid"
+    ></div>
+
+
+    <!-- SEARCH -->
 
     <div class="toolbar">
 
       <input
         id="searchInput"
         type="search"
-        placeholder="Search discussions..."
+        placeholder="Search discussions, devices or codenames..."
       >
 
+
       <select id="categorySelect">
+
         <option value="all">
           All Categories
         </option>
+
       </select>
 
     </div>
@@ -527,102 +795,194 @@
       Recent Discussions
     </h2>
 
-    <div id="threadsList"></div>
+
+    <div id="threadsList">
+
+      <div class="empty">
+        Loading discussions...
+      </div>
+
+    </div>
 
   </section>
 
 
-  <!-- NEW THREAD -->
-  <section id="newThreadPage" class="hidden">
+  <!-- ======================================================
+       CREATE THREAD
+       ====================================================== -->
+
+  <section
+    id="newThreadPage"
+    class="hidden"
+  >
 
     <button
       id="backFromThreadBtn"
       class="button gray"
+      type="button"
       style="margin-bottom:15px"
     >
       ← Back to Forum
     </button>
 
+
     <div class="box">
 
-      <h2>Create New Thread</h2>
+      <h2>
+        Create New Thread
+      </h2>
+
+      <p
+        class="muted"
+        style="margin-bottom:18px"
+      >
+        Start a discussion about a ROM, recovery, kernel,
+        root, guide or Android development topic.
+      </p>
+
 
       <div id="threadMessage"></div>
 
+
       <div class="form-group">
-        <label>Title *</label>
+
+        <label for="threadTitle">
+          Title *
+        </label>
 
         <input
           id="threadTitle"
+          type="text"
           maxlength="150"
           placeholder="[ROM] LineageOS for Galaxy S21"
         >
+
       </div>
 
+
       <div class="form-group">
-        <label>Category *</label>
+
+        <label for="threadCategory">
+          Category *
+        </label>
 
         <select id="threadCategory"></select>
+
       </div>
 
+
       <div class="form-group">
-        <label>Type *</label>
+
+        <label for="threadType">
+          Type *
+        </label>
 
         <select id="threadType">
-          <option>Discussion</option>
-          <option>ROM</option>
-          <option>Recovery</option>
-          <option>Kernel</option>
-          <option>Root</option>
-          <option>Guide</option>
-          <option>Development</option>
-          <option>Question</option>
+
+          <option value="Discussion">
+            Discussion
+          </option>
+
+          <option value="ROM">
+            ROM
+          </option>
+
+          <option value="Recovery">
+            Recovery
+          </option>
+
+          <option value="Kernel">
+            Kernel
+          </option>
+
+          <option value="Root">
+            Root
+          </option>
+
+          <option value="Guide">
+            Guide
+          </option>
+
+          <option value="Development">
+            Development
+          </option>
+
+          <option value="Question">
+            Question
+          </option>
+
         </select>
+
       </div>
 
+
       <div class="form-group">
-        <label>Device</label>
+
+        <label for="threadDevice">
+          Device
+        </label>
 
         <input
           id="threadDevice"
+          type="text"
           maxlength="100"
           placeholder="Samsung Galaxy S21"
         >
+
       </div>
 
+
       <div class="form-group">
-        <label>Codename</label>
+
+        <label for="threadCodename">
+          Codename
+        </label>
 
         <input
           id="threadCodename"
+          type="text"
           maxlength="50"
           placeholder="o1s"
         >
+
       </div>
 
+
       <div class="form-group">
-        <label>Android Version</label>
+
+        <label for="threadAndroid">
+          Android Version
+        </label>
 
         <input
           id="threadAndroid"
+          type="text"
           maxlength="30"
           placeholder="Android 16"
         >
+
       </div>
 
+
       <div class="form-group">
-        <label>Message *</label>
+
+        <label for="threadContent">
+          Message *
+        </label>
 
         <textarea
           id="threadContent"
           maxlength="50000"
-          placeholder="Write your post..."
+          placeholder="Write your discussion here..."
         ></textarea>
+
       </div>
+
 
       <button
         id="publishThreadBtn"
         class="button green"
+        type="button"
       >
         Publish Thread
       </button>
@@ -632,24 +992,46 @@
   </section>
 
 
-  <!-- THREAD -->
-  <section id="threadPage" class="hidden">
+  <!-- ======================================================
+       THREAD VIEW
+       ====================================================== -->
+
+  <section
+    id="threadPage"
+    class="hidden"
+  >
 
     <button
       id="backToForumBtn"
       class="button gray"
+      type="button"
       style="margin-bottom:15px"
     >
       ← Back to Forum
     </button>
 
+
     <div id="threadContainer"></div>
+
+
+    <!-- REPLY BOX -->
 
     <div class="box">
 
-      <h2>Reply</h2>
+      <h2>
+        Reply
+      </h2>
+
+      <p
+        class="muted"
+        style="margin-bottom:14px"
+      >
+        Join the discussion.
+      </p>
+
 
       <div id="replyMessage"></div>
+
 
       <textarea
         id="replyInput"
@@ -657,9 +1039,11 @@
         placeholder="Write your reply..."
       ></textarea>
 
+
       <button
         id="replyBtn"
         class="button"
+        type="button"
         style="margin-top:10px"
       >
         Post Reply
@@ -669,16 +1053,35 @@
 
   </section>
 
+
 </main>
 
 
+<!-- ========================================================
+     FOOTER
+     ======================================================== -->
+
 <footer>
+
   <div class="container">
-    Android Host File • TWRP • Custom ROMs • Kernels
+
+    Android Host File
+    •
+    Custom ROMs
+    •
+    TWRP
+    •
+    Kernels
+    •
+    Forum
+
   </div>
+
 </footer>
+
 
 <script src="forum.js"></script>
 
 </body>
 </html>
+```
