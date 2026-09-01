@@ -27,33 +27,30 @@
 
   <h1>🤖 Android Host File Forum</h1>
 
-  <!-- ================= AUTHENTICATION PAGE ================= -->
+  <!-- AUTHENTICATION FORM -->
   <div id="authPage" class="box">
-    <h2>Sign In or Create Account</h2>
+    <h2>Account Login / Register</h2>
     <div id="authMessage"></div>
     
-    <label>Email Address</label>
-    <input type="email" id="email" placeholder="example@gmail.com" />
+    <label>Username</label>
+    <input type="text" id="username" placeholder="Choose a username..." />
     
     <label>Password</label>
-    <input type="password" id="password" placeholder="Minimum 6 characters" />
+    <input type="password" id="password" placeholder="At least 6 characters..." />
     
     <div style="margin-top: 10px;">
       <button onclick="handleAuth('login')">Sign In</button>
-      <button class="btn-secondary" onclick="handleAuth('register')">Sign Up</button>
+      <button class="btn-secondary" onclick="handleAuth('register')">Create Account</button>
     </div>
   </div>
 
-  <!-- ================= MAIN FORUM PAGE ================= -->
+  <!-- MAIN FORUM -->
   <div id="forumPage" class="hidden">
-    
-    <!-- User Status -->
     <div class="box" style="display: flex; justify-content: space-between; align-items: center;">
-      <div>Logged in as: <strong id="userEmail" style="color: var(--accent);"></strong></div>
+      <div>Logged in as: <strong id="userDisplay" style="color: var(--accent);"></strong></div>
       <button class="btn-secondary" onclick="logout()" style="margin: 0;">Log Out</button>
     </div>
 
-    <!-- Create Post Form -->
     <div class="box">
       <h3>Share a New Hosts File</h3>
       <div id="postError" class="error-msg"></div>
@@ -71,7 +68,6 @@
       <button onclick="createPost()">Publish Post</button>
     </div>
 
-    <!-- Posts Feed -->
     <h2>Recent Posts</h2>
     <div id="postsFeed"></div>
   </div>
@@ -81,14 +77,14 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YXplenN6eGJlZ3RoemtxbW1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNjA3NjQsImV4cCI6MjEwMzgzNjc2NH0.Vgi0AbiYnzPOD_uVafIMcUbNS-DbnD16BlVYTuHopQA';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let currentUser = null;
+    let currentUsername = null;
 
     supabase.auth.onAuthStateChange((event, session) => {
-      currentUser = session ? session.user : null;
-      if (currentUser) {
+      if (session && session.user) {
+        currentUsername = session.user.user_metadata.username || session.user.email.split('@')[0];
         document.getElementById('authPage').classList.add('hidden');
         document.getElementById('forumPage').classList.remove('hidden');
-        document.getElementById('userEmail').innerText = currentUser.email;
+        document.getElementById('userDisplay').innerText = currentUsername;
         loadPosts();
       } else {
         document.getElementById('authPage').classList.remove('hidden');
@@ -97,32 +93,52 @@
     });
 
     async function handleAuth(action) {
-      const email = document.getElementById('email').value;
+      const rawUser = document.getElementById('username').value.trim().toLowerCase();
       const password = document.getElementById('password').value;
       const msgDiv = document.getElementById('authMessage');
       
       msgDiv.className = 'error-msg';
-      msgDiv.innerText = 'Processing...';
 
-      if (!email || !password) {
-        msgDiv.innerText = 'Error: Please enter both email and password.';
+      if (!rawUser || !password) {
+        msgDiv.innerText = 'Error: Enter both username and password.';
         return;
       }
 
+      // Convert username to valid internal email format behind the scenes
+      const dummyEmail = `${rawUser}@forum.local`;
+
       if (action === 'register') {
-        const { error } = await supabase.auth.signUp({ email, password });
+        msgDiv.className = 'success-msg';
+        msgDiv.innerText = 'Creating account...';
+
+        const { error } = await supabase.auth.signUp({
+          email: dummyEmail,
+          password: password,
+          options: { data: { username: rawUser } }
+        });
+
         if (error) {
-          msgDiv.innerText = 'Sign Up Error: ' + error.message;
+          msgDiv.className = 'error-msg';
+          msgDiv.innerText = 'Registration error: ' + error.message;
         } else {
-          msgDiv.className = 'success-msg';
-          msgDiv.innerText = 'Account created! If you cannot log in yet, go to your Supabase Dashboard -> Authentication -> Users, and manually Confirm the email.';
+          // Immediately log in after registration
+          const { error: loginErr } = await supabase.auth.signInWithPassword({
+            email: dummyEmail,
+            password: password
+          });
+          if (loginErr) {
+            msgDiv.className = 'error-msg';
+            msgDiv.innerText = 'Created! Click Sign In to proceed.';
+          }
         }
       } else if (action === 'login') {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        msgDiv.innerText = 'Signing in...';
+        const { error } = await supabase.auth.signInWithPassword({
+          email: dummyEmail,
+          password: password
+        });
         if (error) {
-          msgDiv.innerText = 'Sign In Error: ' + error.message;
-        } else {
-          msgDiv.innerText = '';
+          msgDiv.innerText = 'Login failed: Check your username/password.';
         }
       }
     }
@@ -138,13 +154,13 @@
         .order('created_at', { ascending: false });
 
       if (error) {
-        document.getElementById('postsFeed').innerHTML = `<div class="error-msg">Failed to load posts: ${error.message}. Make sure your 'posts' table exists and RLS allows reading.</div>`;
+        document.getElementById('postsFeed').innerHTML = `<div class="error-msg">Error loading posts: ${error.message}</div>`;
         return;
       }
       
       const feed = document.getElementById('postsFeed');
       if (data.length === 0) {
-        feed.innerHTML = '<p>No posts yet. Be the first!</p>';
+        feed.innerHTML = '<p>No hosts files shared yet. Be the first!</p>';
         return;
       }
 
@@ -154,7 +170,7 @@
             <h3 style="margin:0;">${escapeHtml(post.title || 'Untitled')}</h3>
             <span class="tag">${escapeHtml(post.category || 'General')}</span>
           </div>
-          <div class="meta">Posted by ${escapeHtml(post.user_email || 'Unknown')} on ${new Date(post.created_at).toLocaleDateString()}</div>
+          <div class="meta">Posted by <strong>${escapeHtml(post.user_email || 'Anonymous')}</strong> on ${new Date(post.created_at).toLocaleDateString()}</div>
           <pre id="code-${post.id}">${escapeHtml(post.content || '')}</pre>
           <button class="btn-secondary" style="margin-top: 10px;" onclick="copyCode('code-${post.id}')">Copy Rules</button>
         </div>
@@ -180,7 +196,7 @@
           title: title, 
           category: category, 
           content: content, 
-          user_email: currentUser.email 
+          user_email: currentUsername 
         }]);
 
       if (error) {
