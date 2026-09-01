@@ -16,23 +16,22 @@
     :root {
       --bg: #0f1115;
       --card: #1a1d24;
-      --card2: #111827;
+      --card-hover: #20252e;
+      --input: #111827;
+
       --accent: #3b82f6;
       --green: #10b981;
+      --red: #ef4444;
+
       --text: #e5e7eb;
       --muted: #9ca3af;
       --border: #2d3139;
-      --danger: #ef4444;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
     }
 
     body {
@@ -46,8 +45,9 @@
 
       background: var(--bg);
       color: var(--text);
-      line-height: 1.5;
+
       min-height: 100vh;
+      line-height: 1.5;
     }
 
     button,
@@ -67,12 +67,10 @@
 
     .container {
       width: min(1100px, calc(100% - 32px));
-      margin: 0 auto;
+      margin: auto;
     }
 
-    /* =====================================================
-       HEADER
-       ===================================================== */
+    /* HEADER */
 
     header {
       background:
@@ -94,21 +92,20 @@
     }
 
     .brand h1 {
-      color: #fff;
+      color: white;
       font-size: 1.9rem;
-      line-height: 1.2;
     }
 
     .brand p {
       color: var(--muted);
       font-size: .9rem;
-      margin-top: 5px;
+      margin-top: 4px;
     }
 
     nav {
       display: flex;
-      flex-wrap: wrap;
       gap: 7px;
+      flex-wrap: wrap;
     }
 
     nav a {
@@ -116,43 +113,40 @@
       text-decoration: none;
       padding: 8px 12px;
       border-radius: 8px;
-      transition: .15s;
     }
 
     nav a:hover,
     nav a.active {
-      color: white;
       background: var(--card);
+      color: white;
     }
 
-    /* =====================================================
-       USER BAR
-       ===================================================== */
+    /* USER */
 
     .userbar {
+      margin-top: 18px;
+
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
 
-      margin-top: 18px;
       padding: 12px 15px;
 
-      background: rgba(26, 29, 36, .8);
+      background: rgba(26, 29, 36, .85);
       border: 1px solid var(--border);
       border-radius: 10px;
     }
 
-    #usernameDisplay {
+    .username {
       color: #93c5fd;
+      font-weight: 700;
     }
 
-    /* =====================================================
-       MAIN
-       ===================================================== */
+    /* MAIN */
 
     main {
-      padding: 28px 0 60px;
+      padding: 30px 0 60px;
     }
 
     .hidden {
@@ -167,42 +161,27 @@
       margin-bottom: 18px;
     }
 
-    .box h2 {
+    h2,
+    h3 {
       color: white;
-      margin-bottom: 7px;
     }
 
     .muted {
       color: var(--muted);
     }
 
-    /* =====================================================
-       BUTTONS
-       ===================================================== */
+    /* BUTTON */
 
     .button {
-      border: none;
+      border: 0;
       border-radius: 8px;
+
       padding: 10px 16px;
 
-      background: var(--accent);
       color: white;
+      background: var(--accent);
 
       font-weight: 700;
-      transition: opacity .15s, transform .1s;
-    }
-
-    .button:hover:not(:disabled) {
-      opacity: .9;
-    }
-
-    .button:active:not(:disabled) {
-      transform: translateY(1px);
-    }
-
-    .button:disabled {
-      opacity: .5;
-      cursor: not-allowed;
     }
 
     .button.green {
@@ -214,12 +193,15 @@
     }
 
     .button.red {
-      background: var(--danger);
+      background: var(--red);
     }
 
-    /* =====================================================
-       INPUTS
-       ===================================================== */
+    .button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    /* INPUT */
 
     input,
     textarea,
@@ -228,11 +210,11 @@
 
       padding: 11px 13px;
 
-      background: var(--card2);
-      color: white;
-
-      border: 1px solid var(--border);
       border-radius: 8px;
+      border: 1px solid var(--border);
+
+      background: var(--input);
+      color: white;
 
       outline: none;
     }
@@ -252,8 +234,9 @@
       display: block;
 
       color: #d1d5db;
-      font-size: .9rem;
+
       font-weight: 600;
+      font-size: .9rem;
 
       margin-bottom: 6px;
     }
@@ -262,13 +245,11 @@
       margin-bottom: 15px;
     }
 
-    /* =====================================================
-       AUTH
-       ===================================================== */
+    /* AUTH */
 
     .auth-card {
-      width: min(450px, 100%);
-      margin: 40px auto;
+      max-width: 450px;
+      margin: 45px auto;
     }
 
     .auth-tabs {
@@ -280,13 +261,13 @@
     .auth-tabs button {
       flex: 1;
 
-      border: none;
+      border: 0;
       border-radius: 7px;
 
       padding: 10px;
 
-      background: #374151;
       color: white;
+      background: #374151;
 
       font-weight: 600;
     }
@@ -307,12 +288,11 @@
       margin: 10px 0 15px;
     }
 
-    /* =====================================================
-       CATEGORIES
-       ===================================================== */
+    /* CATEGORIES */
 
     .category-grid {
       display: grid;
+
       grid-template-columns:
         repeat(auto-fit, minmax(240px, 1fr));
 
@@ -321,44 +301,42 @@
       margin: 20px 0 30px;
     }
 
-    .category-card {
+    .category {
       display: block;
-
-      text-decoration: none;
 
       padding: 18px;
 
       background: var(--card);
+
       border: 1px solid var(--border);
       border-radius: 12px;
+
+      text-decoration: none;
 
       transition: .15s;
     }
 
-    .category-card:hover {
+    .category:hover {
       border-color: var(--accent);
-      background: #1d222b;
+      background: var(--card-hover);
       transform: translateY(-2px);
     }
 
     .category-icon {
       font-size: 1.9rem;
-      margin-bottom: 7px;
+      margin-bottom: 6px;
     }
 
-    .category-card h3 {
-      color: white;
+    .category h3 {
       margin-bottom: 5px;
     }
 
-    .category-card p {
+    .category p {
       color: var(--muted);
       font-size: .85rem;
     }
 
-    /* =====================================================
-       TOOLBAR
-       ===================================================== */
+    /* TOOLBAR */
 
     .toolbar {
       display: flex;
@@ -370,29 +348,27 @@
       flex: 1;
     }
 
-    /* =====================================================
-       THREAD LIST
-       ===================================================== */
+    /* THREAD LIST */
 
-    .thread-card {
+    .thread {
       display: block;
 
       padding: 17px;
       margin-bottom: 10px;
 
-      background: var(--card);
       border: 1px solid var(--border);
       border-radius: 12px;
+
+      background: var(--card);
 
       text-decoration: none;
 
       transition: .15s;
     }
 
-    .thread-card:hover {
+    .thread:hover {
+      background: var(--card-hover);
       border-color: var(--accent);
-      background: #1d222b;
-      transform: translateY(-1px);
     }
 
     .thread-title {
@@ -414,30 +390,27 @@
     .badge {
       display: inline-block;
 
+      padding: 3px 8px;
+
       background: #1e293b;
       color: #93c5fd;
-
-      padding: 3px 8px;
 
       border-radius: 5px;
 
       font-size: .72rem;
 
-      margin-right: 5px;
-      margin-bottom: 4px;
+      margin: 0 5px 4px 0;
     }
 
-    /* =====================================================
-       THREAD VIEW
-       ===================================================== */
+    /* THREAD */
 
     .post {
+      overflow: hidden;
+
       background: var(--card);
 
       border: 1px solid var(--border);
       border-radius: 12px;
-
-      overflow: hidden;
 
       margin-bottom: 15px;
     }
@@ -445,8 +418,6 @@
     .post-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-
       gap: 10px;
 
       padding: 12px 15px;
@@ -473,68 +444,43 @@
       overflow-wrap: anywhere;
     }
 
-    .post-actions {
-      padding: 0 18px 15px;
-    }
-
     .device-box {
       border-left: 3px solid var(--accent);
 
-      background: #111827;
+      background: var(--input);
 
       padding: 12px;
+      margin-top: 15px;
 
       border-radius: 5px;
-
-      margin-top: 15px;
-    }
-
-    .device-box div {
-      margin: 3px 0;
     }
 
     .empty {
-      text-align: center;
-
-      color: var(--muted);
-
       padding: 30px;
+      text-align: center;
+      color: var(--muted);
     }
-
-    /* =====================================================
-       FOOTER
-       ===================================================== */
 
     footer {
       border-top: 1px solid var(--border);
 
-      padding: 24px 0;
+      padding: 25px 0;
 
       color: var(--muted);
-
       text-align: center;
 
       font-size: .8rem;
     }
 
-    /* =====================================================
-       MOBILE
-       ===================================================== */
+    /* MOBILE */
 
     @media (max-width: 700px) {
 
-      .header-top {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .userbar {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
+      .header-top,
+      .userbar,
       .toolbar {
         flex-direction: column;
+        align-items: stretch;
       }
 
       .brand h1 {
@@ -545,13 +491,7 @@
   </style>
 </head>
 
-
 <body>
-
-
-<!-- ========================================================
-     HEADER
-     ======================================================== -->
 
 <header>
 
@@ -560,20 +500,14 @@
     <div class="header-top">
 
       <div class="brand">
-
-        <h1>
-          Android Host File
-        </h1>
+        <h1>Android Host File</h1>
 
         <p>
           TWRP • Custom ROMs • Odin Firmware • Kernels
         </p>
-
       </div>
 
-
       <nav>
-
         <a href="index.html">
           Downloads
         </a>
@@ -584,13 +518,10 @@
         >
           Forum
         </a>
-
       </nav>
 
     </div>
 
-
-    <!-- USER SESSION -->
 
     <div
       id="userbar"
@@ -598,23 +529,34 @@
     >
 
       <div>
-
-        Logged in as:
-
-        <strong id="usernameDisplay">
+        You are:
+        <span
+          id="usernameDisplay"
+          class="username"
+        >
           Anonymous
-        </strong>
-
+        </span>
       </div>
 
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
 
-      <button
-        id="logoutBtn"
-        class="button gray"
-        type="button"
-      >
-        Log Out
-      </button>
+        <button
+          id="accountButton"
+          class="button"
+          type="button"
+        >
+          Account
+        </button>
+
+        <button
+          id="logoutBtn"
+          class="button gray"
+          type="button"
+        >
+          New Guest
+        </button>
+
+      </div>
 
     </div>
 
@@ -623,119 +565,22 @@
 </header>
 
 
-<!-- ========================================================
-     MAIN
-     ======================================================== -->
-
 <main class="container">
 
 
   <!-- ======================================================
-       LOGIN / REGISTER
+       FORUM
        ====================================================== -->
 
-  <section
-    id="authPage"
-    class="box auth-card"
-  >
+  <section id="forumHome">
 
-    <h2 id="authTitle">
-      Sign In
-    </h2>
-
-    <p class="muted">
-      Create an account to start discussions and reply.
-    </p>
-
-
-    <div class="auth-tabs">
-
-      <button
-        id="loginTab"
-        class="active"
-        type="button"
-      >
-        Sign In
-      </button>
-
-
-      <button
-        id="registerTab"
-        type="button"
-      >
-        Register
-      </button>
-
-    </div>
-
-
-    <div id="authMessage"></div>
-
-
-    <div class="form-group">
-
-      <label for="usernameInput">
-        Username
-      </label>
-
-      <input
-        id="usernameInput"
-        type="text"
-        maxlength="24"
-        autocomplete="username"
-        placeholder="Your username"
-      >
-
-    </div>
-
-
-    <div class="form-group">
-
-      <label for="passwordInput">
-        Password
-      </label>
-
-      <input
-        id="passwordInput"
-        type="password"
-        maxlength="128"
-        autocomplete="current-password"
-        placeholder="At least 6 characters"
-      >
-
-    </div>
-
-
-    <button
-      id="authBtn"
-      class="button"
-      type="button"
-      style="width:100%"
-    >
-      Sign In
-    </button>
-
-  </section>
-
-
-  <!-- ======================================================
-       FORUM HOME
-       ====================================================== -->
-
-  <section
-    id="forumHome"
-    class="hidden"
-  >
-
-    <div
-      style="
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        gap:15px;
-        margin-bottom:15px;
-      "
-    >
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:15px;
+      margin-bottom:15px;
+    ">
 
       <div>
 
@@ -744,11 +589,10 @@
         </h2>
 
         <p class="muted">
-          Custom ROMs, recoveries, root, kernels and Android development.
+          Custom ROMs, TWRP, root, kernels and Android development.
         </p>
 
       </div>
-
 
       <button
         id="newThreadBtn"
@@ -761,24 +605,19 @@
     </div>
 
 
-    <!-- CATEGORIES -->
-
     <div
       id="categoryGrid"
       class="category-grid"
     ></div>
 
 
-    <!-- SEARCH -->
-
     <div class="toolbar">
 
       <input
         id="searchInput"
         type="search"
-        placeholder="Search discussions, devices or codenames..."
+        placeholder="Search discussions..."
       >
-
 
       <select id="categorySelect">
 
@@ -808,7 +647,7 @@
 
 
   <!-- ======================================================
-       CREATE THREAD
+       NEW THREAD
        ====================================================== -->
 
   <section
@@ -817,12 +656,12 @@
   >
 
     <button
-      id="backFromThreadBtn"
+      id="backNewThreadBtn"
       class="button gray"
       type="button"
       style="margin-bottom:15px"
     >
-      ← Back to Forum
+      ← Back
     </button>
 
 
@@ -836,8 +675,7 @@
         class="muted"
         style="margin-bottom:18px"
       >
-        Start a discussion about a ROM, recovery, kernel,
-        root, guide or Android development topic.
+        Start a discussion about Android development.
       </p>
 
 
@@ -852,7 +690,6 @@
 
         <input
           id="threadTitle"
-          type="text"
           maxlength="150"
           placeholder="[ROM] LineageOS for Galaxy S21"
         >
@@ -874,7 +711,7 @@
       <div class="form-group">
 
         <label for="threadType">
-          Type *
+          Type
         </label>
 
         <select id="threadType">
@@ -924,7 +761,6 @@
 
         <input
           id="threadDevice"
-          type="text"
           maxlength="100"
           placeholder="Samsung Galaxy S21"
         >
@@ -940,7 +776,6 @@
 
         <input
           id="threadCodename"
-          type="text"
           maxlength="50"
           placeholder="o1s"
         >
@@ -956,7 +791,6 @@
 
         <input
           id="threadAndroid"
-          type="text"
           maxlength="30"
           placeholder="Android 16"
         >
@@ -973,7 +807,7 @@
         <textarea
           id="threadContent"
           maxlength="50000"
-          placeholder="Write your discussion here..."
+          placeholder="Write your post..."
         ></textarea>
 
       </div>
@@ -1002,7 +836,7 @@
   >
 
     <button
-      id="backToForumBtn"
+      id="backForumBtn"
       class="button gray"
       type="button"
       style="margin-bottom:15px"
@@ -1014,8 +848,6 @@
     <div id="threadContainer"></div>
 
 
-    <!-- REPLY BOX -->
-
     <div class="box">
 
       <h2>
@@ -1023,12 +855,10 @@
       </h2>
 
       <p
+        id="guestReplyNotice"
         class="muted"
-        style="margin-bottom:14px"
-      >
-        Join the discussion.
-      </p>
-
+        style="margin:7px 0 13px"
+      ></p>
 
       <div id="replyMessage"></div>
 
@@ -1054,27 +884,114 @@
   </section>
 
 
+  <!-- ======================================================
+       ACCOUNT
+       ====================================================== -->
+
+  <section
+    id="accountPage"
+    class="box auth-card hidden"
+  >
+
+    <h2>
+      Your Account
+    </h2>
+
+    <p
+      id="accountStatus"
+      class="muted"
+      style="margin-bottom:18px"
+    ></p>
+
+
+    <div id="accountMessage"></div>
+
+
+    <div id="authForms">
+
+      <div class="auth-tabs">
+
+        <button
+          id="loginTab"
+          class="active"
+          type="button"
+        >
+          Sign In
+        </button>
+
+        <button
+          id="registerTab"
+          type="button"
+        >
+          Register
+        </button>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="usernameInput">
+          Username
+        </label>
+
+        <input
+          id="usernameInput"
+          type="text"
+          maxlength="24"
+          autocomplete="username"
+          placeholder="Your username"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="passwordInput">
+          Password
+        </label>
+
+        <input
+          id="passwordInput"
+          type="password"
+          maxlength="128"
+          placeholder="At least 6 characters"
+        >
+
+      </div>
+
+
+      <button
+        id="authBtn"
+        class="button"
+        type="button"
+        style="width:100%"
+      >
+        Sign In
+      </button>
+
+    </div>
+
+
+    <button
+      id="backAccountBtn"
+      class="button gray"
+      type="button"
+      style="width:100%;margin-top:10px"
+    >
+      ← Back to Forum
+    </button>
+
+  </section>
+
 </main>
 
-
-<!-- ========================================================
-     FOOTER
-     ======================================================== -->
 
 <footer>
 
   <div class="container">
-
-    Android Host File
-    •
-    Custom ROMs
-    •
-    TWRP
-    •
-    Kernels
-    •
-    Forum
-
+    Android Host File Forum
   </div>
 
 </footer>
