@@ -1,121 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Android Host file forum</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Android Host File Forum</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root { --android-green: #3ddc84; --bg: #121212; --card-bg: #1e1e1e; --text: #e0e0e0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); max-width: 750px; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
+    :root { --bg: #0f1115; --card: #1a1d24; --text: #e2e8f0; --accent: #3ddc84; --error: #ef4444; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); max-width: 800px; margin: 0 auto; padding: 20px; }
     h1, h2, h3 { color: #fff; }
-    .card { background: var(--card-bg); border: 1px solid #333; padding: 1.2rem; margin-bottom: 1.2rem; border-radius: 8px; }
-    .hidden { display: none; }
-    .meta { font-size: 0.85rem; color: #aaa; margin-bottom: 0.5rem; }
-    .tag { background: #2d3748; color: var(--android-green); padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
-    input, select, textarea { width: 100%; padding: 10px; margin: 6px 0 12px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; }
-    textarea { font-family: monospace; font-size: 0.9rem; white-space: pre; }
-    button { background: var(--android-green); color: #000; border: none; padding: 10px 16px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+    .box { background: var(--card); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #2d3748; }
+    .hidden { display: none !important; }
+    input, select, textarea { width: 100%; padding: 12px; margin-bottom: 12px; background: #2d3748; border: 1px solid #4a5568; color: white; border-radius: 6px; box-sizing: border-box; }
+    button { background: var(--accent); color: #000; padding: 12px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; margin-right: 10px; }
     button:hover { opacity: 0.9; }
-    button.alt { background: #444; color: #fff; margin-left: 8px; }
-    pre { background: #000; padding: 12px; border-radius: 4px; overflow-x: auto; font-size: 0.85rem; color: #3ddc84; border: 1px solid #222; }
+    .btn-secondary { background: #4a5568; color: white; }
+    .error-msg { color: var(--error); font-weight: bold; margin-bottom: 15px; }
+    .success-msg { color: var(--accent); font-weight: bold; margin-bottom: 15px; }
+    .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .tag { background: #2d3748; padding: 4px 10px; border-radius: 4px; font-size: 12px; color: var(--accent); }
+    .meta { font-size: 12px; color: #a0aec0; margin-bottom: 10px; }
+    pre { background: #000; padding: 15px; border-radius: 6px; overflow-x: auto; color: var(--accent); border: 1px solid #2d3748; }
   </style>
 </head>
 <body>
 
-  <h1> Android Host file forum </h1>
+  <h1>🤖 Android Host File Forum</h1>
 
-  <!-- Auth View -->
-  <div id="authSection" class="card">
-    <h3 id="authTitle">Sign In / Sign Up</h3>
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="handleAuth('login')">Log In</button>
-    <button class="alt" onclick="handleAuth('signup')">Sign Up</button>
+  <!-- ================= AUTHENTICATION PAGE ================= -->
+  <div id="authPage" class="box">
+    <h2>Sign In or Create Account</h2>
+    <div id="authMessage"></div>
+    
+    <label>Email Address</label>
+    <input type="email" id="email" placeholder="example@gmail.com" />
+    
+    <label>Password</label>
+    <input type="password" id="password" placeholder="Minimum 6 characters" />
+    
+    <div style="margin-top: 10px;">
+      <button onclick="handleAuth('login')">Sign In</button>
+      <button class="btn-secondary" onclick="handleAuth('register')">Sign Up</button>
+    </div>
   </div>
 
-  <!-- Main Forum View -->
-  <div id="forumSection" class="hidden">
-    <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-      <span>Logged in as: <strong id="userEmail" style="color: var(--android-green);"></strong></span>
-      <button class="alt" onclick="logout()">Log Out</button>
+  <!-- ================= MAIN FORUM PAGE ================= -->
+  <div id="forumPage" class="hidden">
+    
+    <!-- User Status -->
+    <div class="box" style="display: flex; justify-content: space-between; align-items: center;">
+      <div>Logged in as: <strong id="userEmail" style="color: var(--accent);"></strong></div>
+      <button class="btn-secondary" onclick="logout()" style="margin: 0;">Log Out</button>
     </div>
 
-    <!-- Submit Hosts Snippet -->
-    <div class="card">
-      <h3>Share Hosts Rules</h3>
-      <input type="text" id="postTitle" placeholder="Title (e.g., Anti-Adware Ruleset 2026)" />
+    <!-- Create Post Form -->
+    <div class="box">
+      <h3>Share a New Hosts File</h3>
+      <div id="postError" class="error-msg"></div>
+      
+      <input type="text" id="postTitle" placeholder="Title (e.g., Block All Ads 2026)" />
       
       <select id="postCategory">
         <option value="Adblocking">Adblocking</option>
-        <option value="Malware & Tracking">Malware & Tracking</option>
-        <option value="Social Media Block">Social Media Block</option>
-        <option value="Gaming & Apps">Gaming & Apps</option>
-        <option value="Custom">Custom / General</option>
+        <option value="Malware">Malware & Tracking</option>
+        <option value="Gaming">Gaming & Apps</option>
+        <option value="General">General</option>
       </select>
 
-      <textarea id="postContent" rows="6" placeholder="0.0.0.0 ads.example.com&#10;0.0.0.0 tracking.badsite.com"></textarea>
-      <button onclick="createPost()">Publish Rules</button>
+      <textarea id="postContent" rows="5" placeholder="0.0.0.0 ads.example.com&#10;0.0.0.0 trackers.com"></textarea>
+      <button onclick="createPost()">Publish Post</button>
     </div>
 
-    <h3>Community Rulesets</h3>
+    <!-- Posts Feed -->
+    <h2>Recent Posts</h2>
     <div id="postsFeed"></div>
   </div>
 
   <script>
     const SUPABASE_URL = 'https://hzazezszxbgethzkqmmf.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YXplenN6eGJlZ3RoemtxbW1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNjA3NjQsImV4cCI6MjEwMzgzNjc2NH0.Vgi0AbiYnzPOD_uVafIMcUbNS-DbnD16BlVYTuHopQA';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentUser = null;
 
-    supabaseClient.auth.onAuthStateChange((event, session) => {
+    supabase.auth.onAuthStateChange((event, session) => {
       currentUser = session ? session.user : null;
       if (currentUser) {
-        document.getElementById('authSection').classList.add('hidden');
-        document.getElementById('forumSection').classList.remove('hidden');
+        document.getElementById('authPage').classList.add('hidden');
+        document.getElementById('forumPage').classList.remove('hidden');
         document.getElementById('userEmail').innerText = currentUser.email;
         loadPosts();
       } else {
-        document.getElementById('authSection').classList.remove('hidden');
-        document.getElementById('forumSection').classList.add('hidden');
+        document.getElementById('authPage').classList.remove('hidden');
+        document.getElementById('forumPage').classList.add('hidden');
       }
     });
 
-    async function handleAuth(type) {
+    async function handleAuth(action) {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
+      const msgDiv = document.getElementById('authMessage');
+      
+      msgDiv.className = 'error-msg';
+      msgDiv.innerText = 'Processing...';
 
-      const { error } = type === 'signup' 
-        ? await supabaseClient.auth.signUp({ email, password })
-        : await supabaseClient.auth.signInWithPassword({ email, password });
+      if (!email || !password) {
+        msgDiv.innerText = 'Error: Please enter both email and password.';
+        return;
+      }
 
-      if (error) alert(error.message);
-      else if (type === 'signup') alert('Account created! Please log in.');
+      if (action === 'register') {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) {
+          msgDiv.innerText = 'Sign Up Error: ' + error.message;
+        } else {
+          msgDiv.className = 'success-msg';
+          msgDiv.innerText = 'Account created! If you cannot log in yet, go to your Supabase Dashboard -> Authentication -> Users, and manually Confirm the email.';
+        }
+      } else if (action === 'login') {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          msgDiv.innerText = 'Sign In Error: ' + error.message;
+        } else {
+          msgDiv.innerText = '';
+        }
+      }
     }
 
     async function logout() {
-      await supabaseClient.auth.signOut();
+      await supabase.auth.signOut();
     }
 
     async function loadPosts() {
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabase
         .from('posts')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) return console.error(error);
+      if (error) {
+        document.getElementById('postsFeed').innerHTML = `<div class="error-msg">Failed to load posts: ${error.message}. Make sure your 'posts' table exists and RLS allows reading.</div>`;
+        return;
+      }
       
       const feed = document.getElementById('postsFeed');
+      if (data.length === 0) {
+        feed.innerHTML = '<p>No posts yet. Be the first!</p>';
+        return;
+      }
+
       feed.innerHTML = data.map(post => `
-        <div class="card">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin:0;">${escapeHtml(post.title || 'Untitled Hosts File')}</h3>
+        <div class="box">
+          <div class="post-header">
+            <h3 style="margin:0;">${escapeHtml(post.title || 'Untitled')}</h3>
             <span class="tag">${escapeHtml(post.category || 'General')}</span>
           </div>
-          <div class="meta">Shared by ${post.user_email} on ${new Date(post.created_at).toLocaleDateString()}</div>
-          <pre id="code-${post.id}"><code>${escapeHtml(post.content)}</code></pre>
-          <button class="alt" onclick="copyRules('code-${post.id}')">Copy Rules</button>
+          <div class="meta">Posted by ${escapeHtml(post.user_email || 'Unknown')} on ${new Date(post.created_at).toLocaleDateString()}</div>
+          <pre id="code-${post.id}">${escapeHtml(post.content || '')}</pre>
+          <button class="btn-secondary" style="margin-top: 10px;" onclick="copyCode('code-${post.id}')">Copy Rules</button>
         </div>
       `).join('');
     }
@@ -124,10 +165,16 @@
       const title = document.getElementById('postTitle').value;
       const category = document.getElementById('postCategory').value;
       const content = document.getElementById('postContent').value;
+      const errorDiv = document.getElementById('postError');
       
-      if (!title || !content) return alert('Please enter both a title and host rules.');
+      errorDiv.innerText = '';
 
-      const { error } = await supabaseClient
+      if (!title || !content) {
+        errorDiv.innerText = 'Error: Title and Content are required.';
+        return;
+      }
+
+      const { error } = await supabase
         .from('posts')
         .insert([{ 
           title: title, 
@@ -136,22 +183,23 @@
           user_email: currentUser.email 
         }]);
 
-      if (error) alert(error.message);
-      else {
+      if (error) {
+        errorDiv.innerText = 'Failed to post: ' + error.message;
+      } else {
         document.getElementById('postTitle').value = '';
         document.getElementById('postContent').value = '';
         loadPosts();
       }
     }
 
-    function copyRules(elementId) {
+    function copyCode(elementId) {
       const text = document.getElementById(elementId).innerText;
       navigator.clipboard.writeText(text);
-      alert('Hosts rules copied to clipboard!');
+      alert('Copied to clipboard!');
     }
 
     function escapeHtml(str) {
-      return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+      return str ? String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
     }
   </script>
 </body>
